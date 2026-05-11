@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Symplexy Carousel</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #0a0a0f;
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+    padding: 40px 20px;
+  }
+
+  .label {
+    color: #666;
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: -30px;
+    align-self: flex-start;
+    margin-left: calc(50% - 540px);
+  }
+
+  /* ── SLIDE BASE ── */
+  .slide {
+    width: 1080px;
+    height: 1080px;
+    background: linear-gradient(145deg, #08081a 0%, #0d0d2b 50%, #0a0a1e 100%);
+    border-radius: 24px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 80px;
+    flex-shrink: 0;
+  }
+
+  /* Grid overlay */
+  .slide::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(100, 80, 255, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(100, 80, 255, 0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+
+  /* Glow blobs */
+  .glow-1 {
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(120, 60, 255, 0.12) 0%, transparent 70%);
+    top: -200px;
+    right: -200px;
+    pointer-events: none;
+  }
+  .glow-2 {
+    position: absolute;
+    width: 400px;
+    height: 400px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0, 180, 255, 0.10) 0%, transparent 70%);
+    bottom: -100px;
+    left: -100px;
+    pointer-events: none;
+  }
+
+  /* ── LOGO ── */
+  .logo {
+    position: absolute;
+    top: 48px;
+    left: 60px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 10;
+  }
+  .logo-icon {
+    width: 40px;
+    height: 40px;
+  }
+  .logo-text {
+    font-size: 20px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #a78bfa, #60a5fa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 0.5px;
+  }
+
+  /* ── CORNER TAG ── */
+  .corner-tag {
+    position: absolute;
+    bottom: 48px;
+    right: 60px;
+    font-size: 18px;
+    color: rgba(255,255,255,0.25);
+    font-weight: 500;
+    z-index: 10;
+  }
+
+  /* ══════════════════════════════
+     SLIDE 1 — COVER
+  ══════════════════════════════ */
+  .slide-1 .main-content {
+    text-align: center;
+    z-index: 10;
+    position: relative;
+  }
+
+  .slide-1 .eyebrow {
+    font-size: 20px;
+    font-weight: 600;
+    color: #a78bfa;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+  }
+  .eyebrow-line {
+    width: 40px;
+    height: 2px;
+    background: #a78bfa;
+    display: inline-block;
+    border-radius: 2px;
+  }
+
+  .slide-1 .big-number {
+    font-size: 220px;
+    font-weight: 900;
+    background: linear-gradient(135deg, rgba(167,139,250,0.15), rgba(96,165,250,0.15));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  .slide-1 .headline {
+    font-size: 64px;
+    font-weight: 900;
+    line-height: 1.1;
+    color: #fff;
+    margin-bottom: 28px;
+    position: relative;
+    z-index: 10;
+  }
+
+  .slide-1 .headline span {
+    background: linear-gradient(135deg, #a78bfa 0%, #60a5fa 50%, #f472b6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .slide-1 .subtitle {
+    font-size: 24px;
+    color: rgba(255,255,255,0.45);
+    font-weight: 400;
+    letter-spacing: 1px;
+  }
+
+  .slide-1 .chips {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 48px;
+    flex-wrap: wrap;
+  }
+
+  .chip {
+    background: rgba(167,139,250,0.12);
+    border: 1px solid rgba(167,139,250,0.3);
+    color: #a78bfa;
+    font-size: 15px;
+    font-weight: 600;
+    padding: 8px 18px;
+    border-radius: 100px;
+  }
+
+  /* ══════════════════════════════
+     SLIDES 2–6 — TOOL SLIDES
+  ══════════════════════════════ */
+  .tool-slide {
+    justify-content: flex-start;
+    padding-top: 100px;
+    padding-bottom: 80px;
+  }
+
+  .slide-number {
+    font-size: 140px;
+    font-weight: 900;
+    line-height: 1;
+    background: linear-gradient(135deg, rgba(167,139,250,0.2), rgba(96,165,250,0.1));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    position: absolute;
+    top: 60px;
+    right: 80px;
+    z-index: 2;
+  }
+
+  .tool-content {
+    z-index: 10;
+    position: relative;
+    width: 100%;
+  }
+
+  .tool-icon-wrap {
+    width: 96px;
+    height: 96px;
+    border-radius: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 52px;
+    margin-bottom: 40px;
+    position: relative;
+  }
+
+  .tool-icon-wrap::after {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 24px;
+    border: 1px solid;
+    opacity: 0.4;
+  }
+
+  .icon-purple { background: rgba(167,139,250,0.15); }
+  .icon-purple::after { border-color: #a78bfa; }
+
+  .icon-blue { background: rgba(96,165,250,0.15); }
+  .icon-blue::after { border-color: #60a5fa; }
+
+  .icon-pink { background: rgba(244,114,182,0.15); }
+  .icon-pink::after { border-color: #f472b6; }
+
+  .icon-cyan { background: rgba(34,211,238,0.15); }
+  .icon-cyan::after { border-color: #22d3ee; }
+
+  .icon-green { background: rgba(52,211,153,0.15); }
+  .icon-green::after { border-color: #34d399; }
+
+  .tool-name {
+    font-size: 52px;
+    font-weight: 900;
+    color: #fff;
+    line-height: 1;
+    margin-bottom: 16px;
+  }
+
+  .tool-category {
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 36px;
+  }
+
+  .purple-text { color: #a78bfa; }
+  .blue-text { color: #60a5fa; }
+  .pink-text { color: #f472b6; }
+  .cyan-text { color: #22d3ee; }
+  .green-text { color: #34d399; }
+
+  .tool-desc {
+    font-size: 32px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.75);
+    line-height: 1.4;
+    margin-bottom: 48px;
+    max-width: 800px;
+  }
+
+  .stat-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 28px;
+    border-radius: 100px;
+    font-size: 22px;
+    font-weight: 700;
+  }
+
+  .badge-purple { background: rgba(167,139,250,0.15); border: 1px solid rgba(167,139,250,0.4); color: #a78bfa; }
+  .badge-blue   { background: rgba(96,165,250,0.15);  border: 1px solid rgba(96,165,250,0.4);  color: #60a5fa; }
+  .badge-pink   { background: rgba(244,114,182,0.15); border: 1px solid rgba(244,114,182,0.4); color: #f472b6; }
+  .badge-cyan   { background: rgba(34,211,238,0.15);  border: 1px solid rgba(34,211,238,0.4);  color: #22d3ee; }
+  .badge-green  { background: rgba(52,211,153,0.15);  border: 1px solid rgba(52,211,153,0.4);  color: #34d399; }
+
+  /* Progress dots */
+  .dots {
+    position: absolute;
+    bottom: 48px;
+    left: 60px;
+    display: flex;
+    gap: 8px;
+    z-index: 10;
+  }
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+  }
+  .dot.active {
+    width: 24px;
+    border-radius: 4px;
+    background: #a78bfa;
+  }
+
+  /* Divider line */
+  .divider {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(167,139,250,0.5), rgba(96,165,250,0.3), transparent);
+    margin-bottom: 40px;
+  }
+
+  /* ══════════════════════════════
+     SLIDE 7 — CTA
+  ══════════════════════════════ */
+  .slide-7 .cta-content {
+    text-align: center;
+    z-index: 10;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .slide-7 .logo-big {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 40px;
+    filter: drop-shadow(0 0 40px rgba(167,139,250,0.6));
+  }
+
+  .slide-7 .cta-eyebrow {
+    font-size: 18px;
+    font-weight: 600;
+    color: #a78bfa;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+
+  .slide-7 .cta-headline {
+    font-size: 72px;
+    font-weight: 900;
+    line-height: 1.1;
+    color: #fff;
+    margin-bottom: 20px;
+  }
+
+  .slide-7 .cta-headline span {
+    background: linear-gradient(135deg, #a78bfa 0%, #60a5fa 60%, #f472b6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .slide-7 .cta-sub {
+    font-size: 28px;
+    color: rgba(255,255,255,0.45);
+    margin-bottom: 60px;
+    font-weight: 400;
+  }
+
+  .cta-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: linear-gradient(135deg, #7c3aed, #2563eb);
+    color: #fff;
+    font-size: 26px;
+    font-weight: 700;
+    padding: 22px 52px;
+    border-radius: 100px;
+    letter-spacing: 0.5px;
+    box-shadow: 0 0 40px rgba(124,58,237,0.4), 0 0 80px rgba(37,99,235,0.2);
+    margin-bottom: 36px;
+  }
+
+  .slide-7 .link-hint {
+    font-size: 20px;
+    color: rgba(255,255,255,0.3);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* SVG logo inline */
+  .logo-svg {
+    width: 100%;
+    height: 100%;
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════ SLIDE 1 — COVER ═══════════ -->
+<div class="label">SLIDE 1 / 7 — Обкладинка</div>
+<div class="slide slide-1">
+  <div class="glow-1"></div>
+  <div class="glow-2"></div>
+
+  <div class="logo">
+    <svg class="logo-icon" viewBox="0 0 40 40" fill="none">
+      <path d="M20 2L26 14H38L29 22L32 35L20 28L8 35L11 22L2 14H14L20 2Z"
+        fill="url(#lg1)" opacity="0.9"/>
+      <defs>
+        <linearGradient id="lg1" x1="2" y1="2" x2="38" y2="38">
+          <stop offset="0%" stop-color="#a78bfa"/>
+          <stop offset="100%" stop-color="#60a5fa"/>
+        </linearGradient>
+      </defs>
+    </svg>
+    <span class="logo-text">Symplexy</span>
+  </div>
+
+  <div class="main-content">
+    <div class="eyebrow">
+      <span class="eyebrow-line"></span>
+      ШІ для маркетологів
+      <span class="eyebrow-line"></span>
+    </div>
+    <div class="headline">
+      <span>5 ШІ-інструментів</span><br>
+      які замінять<br>маркетинговий відділ
+    </div>
+    <div class="subtitle">Перевірено. Без зайвих слів.</div>
+    <div class="chips">
+      <span class="chip">Тексти</span>
+      <span class="chip">Дизайн</span>
+      <span class="chip">Контент</span>
+      <span class="chip">Аналітика</span>
+      <span class="chip">Email</span>
+    </div>
+  </div>
+
+  <div class="dots">
+    <div class="dot active"></div>
+    <div class="dot"></div><div class="dot"></div>
+    <div class="dot"></div><div class="dot"></div>
+    <div class="dot"></div><div class="dot"></div>
+  </div>
+  <div class="corner-tag">@_symplexy</div>
+</div>
+
+<!-- ═══════════ SLIDE 2 — ChatGPT/Claude ═══════════ -->
+<div class="label">SLIDE 2 / 7 — ChatGPT / Claude</div>
+<div class="slide tool-slide">
+  <div class="glow-1"></div>
+  <div class="glow-2"></div>
+  <div class="logo">
+    <svg class="logo-icon" viewBox="0 0 40 40" fill="none">
+      <path d="M20 2L26 14H38L29 22L32 35L20 28L8 35L11 22L2 14H14L20 2Z" fill="url(#lg2)" opacity="0.9"/>
+      <defs><linearGradient id="lg2" x1="2" y1="2" x2="38" y2="38"><stop offset="0%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#60a5fa"/></linearGradient></defs>
+    </svg>
+    <span class="logo-text">Symplexy</span>
+  </div>
+  <div class="slide-number">01</div>
+
+  <div class="tool-content">
+    <div class="tool-icon-wrap icon-purple">🤖</div>
+    <div class="tool-name">ChatGPT / Claude</div>
+    <div class="tool-category purple-text">Генерація контенту</div>
+    <div class="divider"></div>
+    <div class="tool-desc">
+      Пише продаючі тексти, email-розсилки<br>та скрипти за лічені хвилини
+    </div>
+    <div class="stat-badge badge-purple">⚡ Економить до 8 год/тиждень</div>
+  </div>
+
+  <div class="dots">
+    <div class="dot"></div>
+    <div class="dot active"></div>
+    <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+  </div>
+  <div class="corner-tag">@_symplexy</div>
+</div>
+
+<!-- ═══════════ SLIDE 3 — Canva AI ═══════════ -->
+<div class="label">SLIDE 3 / 7 — Canva AI</div>
+<div class="slide tool-slide">
+  <div class="glow-1"></div>
+  <div class="glow-2"></div>
+  <div class="logo">
+    <svg class="logo-icon" viewBox="0 0 40 40" fill="none">
+      <path d="M20 2L26 14H38L29 22L32 35L20 28L8 35L11 22L2 14H14L20 2Z" fill="url(#lg3)" opacity="0.9"/>
+      <defs><linearGradient id="lg3" x1="2" y1="2" x2="38" y2="38"><stop offset="0%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#60a5fa"/></linearGradient></defs>
+    </svg>
+    <span class="logo-text">Symplexy</span>
+  </div>
+  <div class="slide-number">02</div>
+
+  <div class="tool-content">
+    <div class="tool-icon-wrap icon-blue">🎨</div>
+    <div class="tool-name">Canva AI</div>
+    <div class="tool-category blue-text">Дизайн та візуали</div>
+    <div class="divider"></div>
+    <div class="tool-desc">
+      Генерує банери та рекламні<br>креативи без дизайнера
+    </div>
+    <div class="stat-badge badge-blue">⚡ Дизайн за 2 хвилини</div>
+  </div>
+
+  <div class="dots">
+    <div class="dot"></div><div class="dot"></div>
+    <div class="dot active"></div>
+    <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+  </div>
+  <div class="corner-tag">@_symplexy</div>
+</div>
+
+<!-- ═══════════ SLIDE 4 — Lately AI ═══════════ -->
+<div class="label">SLIDE 4 / 7 — Lately AI</div>
+<div class="slide tool-slide">
+  <div class="glow-1"></div>
+  <div class="glow-2"></div>
+  <div class="logo">
+    <svg class="logo-icon" viewBox="0 0 40 40" fill="none">
+      <path d="M20 2L26 14H38L29 22L32 35L20 28L8 35L11 22L2 14H14L20 2Z" fill="url(#lg4)" opacity="0.9"/>
+      <defs><linearGradient id="lg4" x1="2" y1="2" x2="38" y2="38"><stop offset="0%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#60a5fa"/></linearGradient></defs>
+    </svg>
+    <span class="logo-text">Symplexy</span>
+  </div>
+  <div class="slide-number">03</div>
+
+  <div class="tool-content">
+    <div class="tool-icon-wrap icon-pink">📅</div>
+    <div class="tool-name">Lately AI</div>
+    <div class="tool-category pink-text">Контент-планування</div>
+    <div class="divider"></div>
+    <div class="tool-desc">
+      Аналізує аудиторію та автоматично<br>генерує контент-план на місяць
+    </div>
+    <div class="stat-badge badge-pink">⚡ Забудь про "що постити"</div>
+  </div>
+
+  <div class="dots">
+    <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+    <div class="dot active"></div>
+    <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+  </div>
+  <div class="corner-tag">@_symplexy</div>
+</div>
+
+<!-- ═══════════ SLIDE 5 — Hotjar AI ═══════════ -->
+<div class="label">SLIDE 5 / 7 — Hotjar AI</div>
+<div class="slide tool-slide">
+  <div class="glow-1"></div>
+  <div class="glow-2"></div>
+  <div class="logo">
+    <svg class="logo-icon" viewBox="0 0 40 40" fill="none">
+      <path d="M20 2L26 14H38L29 22L32 35L20 28L8 35L11 22L2 14H14L20 2Z" fill="url(#lg5)" opacity="0.9"/>
+      <defs><linearGradient id="lg5" x1="2" y1="2" x2="38" y2="38"><stop offset="0%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#60a5fa"/></linearGradient></defs>
+    </svg>
+    <span class="logo-text">Symplexy</span>
+  </div>
+  <div class="slide-number">04</div>
+
+  <div class="tool-content">
+    <div class="tool-icon-wrap icon-cyan">👁️</div>
+    <div class="tool-name">Hotjar AI</div>
+    <div class="tool-category cyan-text">Аналітика поведінки</div>
+    <div class="divider"></div>
+    <div class="tool-desc">
+      Показує що заважає клієнтам<br>купувати на твоєму сайті
+    </div>
+    <div class="stat-badge badge-cyan">⚡ Знайди слабкі місця</div>
+  </div>
+
+  <div class="dots">
+    <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+    <div class="dot active"></div>
+    <div class="dot"></div><div class="dot"></div>
+  </div>
+  <div class="corner-tag">@_symplexy</div>
+</div>
+
+<!-- ═══════════ SLIDE 6 — Klaviyo AI ═══════════ -->
+<div class="label">SLIDE 6 / 7 — Klaviyo AI</div>
+<div class="slide tool-slide">
+  <div class="glow-1"></div>
+  <div class="glow-2"></div>
+  <div class="logo">
+    <svg class="logo-icon" viewBox="0 0 40 40" fill="none">
+      <path d="M20 2L26 14H38L29 22L32 35L20 28L8 35L11 22L2 14H14L20 2Z" fill="url(#lg6)" opacity="0.9"/>
+      <defs><linearGradient id="lg6" x1="2" y1="2" x2="38" y2="38"><stop offset="0%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#60a5fa"/></linearGradient></defs>
+    </svg>
+    <span class="logo-text">Symplexy</span>
+  </div>
+  <div class="slide-number">05</div>
+
+  <div class="tool-content">
+    <div class="tool-icon-wrap icon-green">📧</div>
+    <div class="tool-name">Klaviyo AI</div>
+    <div class="tool-category green-text">Email-маркетинг</div>
+    <div class="divider"></div>
+    <div class="tool-desc">
+      Email-маркетинг що сегментує базу<br>і продає автоматично
+    </div>
+    <div class="stat-badge badge-green">⚡ Конверсія без ручної роботи</div>
+  </div>
+
+  <div class="dots">
+    <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+    <div class="dot active"></div>
+    <div class="dot"></div>
+  </div>
+  <div class="corner-tag">@_symplexy</div>
+</div>
+
+<!-- ═══════════ SLIDE 7 — CTA ═══════════ -->
+<div class="label">SLIDE 7 / 7 — CTA</div>
+<div class="slide slide-7">
+  <div class="glow-1"></div>
+  <div class="glow-2"></div>
+
+  <div class="logo">
+    <svg class="logo-icon" viewBox="0 0 40 40" fill="none">
+      <path d="M20 2L26 14H38L29 22L32 35L20 28L8 35L11 22L2 14H14L20 2Z" fill="url(#lg7)" opacity="0.9"/>
+      <defs><linearGradient id="lg7" x1="2" y1="2" x2="38" y2="38"><stop offset="0%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#60a5fa"/></linearGradient></defs>
+    </svg>
+    <span class="logo-text">Symplexy</span>
+  </div>
+
+  <div class="cta-content">
+    <svg class="logo-big" viewBox="0 0 120 120" fill="none">
+      <defs>
+        <linearGradient id="lg8" x1="10" y1="10" x2="110" y2="110">
+          <stop offset="0%" stop-color="#a78bfa"/>
+          <stop offset="50%" stop-color="#60a5fa"/>
+          <stop offset="100%" stop-color="#f472b6"/>
+        </linearGradient>
+        <filter id="glow8">
+          <feGaussianBlur stdDeviation="4" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+      <path d="M60 8L75 40H112L84 62L94 96L60 76L26 96L36 62L8 40H45L60 8Z"
+        fill="url(#lg8)" filter="url(#glow8)" opacity="0.95"/>
+    </svg>
+
+    <div class="cta-eyebrow">Готовий почати?</div>
+    <div class="cta-headline">
+      Всі ці інструменти<br>на <span>Symplexy</span>
+    </div>
+    <div class="cta-sub">Тестуй безкоштовно. Без кредитки.</div>
+    <div class="cta-button">
+      🚀 Спробувати безкоштовно
+    </div>
+    <div class="link-hint">
+      <span>👆</span>
+      <span>Посилання в шапці профілю</span>
+    </div>
+  </div>
+
+  <div class="dots">
+    <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+    <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+    <div class="dot active"></div>
+  </div>
+</div>
+
+</body>
+</html>

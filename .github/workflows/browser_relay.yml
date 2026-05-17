@@ -1,0 +1,38 @@
+name: Browser Relay
+
+on:
+  push:
+    paths:
+      - '.relay/request.json'
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install playwright httpx beautifulsoup4 lxml markdownify
+          playwright install chromium --with-deps
+
+      - name: Run browser task
+        env:
+          ROZETKA_PHONE: ${{ secrets.ROZETKA_PHONE }}
+          ROZETKA_PASSWORD: ${{ secrets.ROZETKA_PASSWORD }}
+        run: python .relay/runner.py
+
+      - name: Commit result
+        run: |
+          git config user.email "relay-bot@github-actions"
+          git config user.name "Browser Relay"
+          git add .relay/result.json .relay/screenshots/ || true
+          git diff --staged --quiet || git commit -m "relay: result [skip ci]"
+          git push

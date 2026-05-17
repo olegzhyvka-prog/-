@@ -29,8 +29,34 @@ MODEL = "claude-opus-4-7"
 MAX_ITERATIONS = 50
 WORKSPACE = Path("./workspace")
 WORKSPACE.mkdir(exist_ok=True)
+BASE_URL = os.environ.get("ANTHROPIC_BASE_URL", "https://api.anthropic.com")
 
-client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
+# ── Auth ──────────────────────────────────────────────────────────────────────
+
+def _get_auth() -> dict:
+    """Return httpx headers for Anthropic API auth."""
+    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    if api_key:
+        return {"x-api-key": api_key, "anthropic-version": "2023-06-01", "content-type": "application/json"}
+
+    session_token_file = "/home/claude/.claude/remote/.session_ingress_token"
+    if os.path.exists(session_token_file):
+        token = Path(session_token_file).read_text().strip()
+        return {"Authorization": f"Bearer {token}", "anthropic-version": "2023-06-01", "content-type": "application/json"}
+
+    print("Error: no auth found. Set ANTHROPIC_API_KEY or run inside Claude Code.")
+    sys.exit(1)
+
+AUTH_HEADERS = _get_auth()
+HTTP = httpx.Client(headers=AUTH_HEADERS, timeout=120)
+
+
+def _call_api(messages: list, system: str, tools: list) -> dict:
+    """Make a raw API call to Anthropic and return the response dict."""
+    body = {"model": MODEL, "max_tokens": 4096, "system": system, "tools": tools, "messages": messages}
+    r = HTTP.post(f"{BASE_URL}/v1/messages", json=body)
+    r.raise_for_status()
+    return r.json()
 
 # ── Tool implementations ──────────────────────────────────────────────────────
 
@@ -265,42 +291,38 @@ def run_agent(task: str) -> None:
         iteration += 1
         print(f"[Step {iteration}] Thinking...")
 
-        response = client.messages.create(
-            model=MODEL,
-            max_tokens=4096,
-            system=SYSTEM_PROMPT,
-            tools=TOOLS,
-            messages=messages,
-        )
+        resp = _call_api(messages, SYSTEM_PROMPT, TOOLS)
+        content = resp["content"]
+        stop_reason = resp["stop_reason"]
 
         # Add assistant response to history
-        messages.append({"role": "assistant", "content": response.content})
+        messages.append({"role": "assistant", "content": content})
 
         # Check stop reason
-        if response.stop_reason == "end_turn":
-            # Extract final text
-            for block in response.content:
-                if hasattr(block, "text"):
+        if stop_reason == "end_turn":
+            for block in content:
+                if block.get("type") == "text":
                     print(f"\n{'='*60}")
                     print("DONE:")
-                    print(block.text)
+                    print(block["text"])
                     print(f"{'='*60}")
             break
 
-        if response.stop_reason != "tool_use":
-            print(f"Stopped: {response.stop_reason}")
+        if stop_reason != "tool_use":
+            print(f"Stopped: {stop_reason}")
             break
 
         # Process tool calls
         tool_results = []
-        for block in response.content:
-            if block.type != "tool_use":
-                if hasattr(block, "text") and block.text:
-                    print(f"  → {block.text[:200]}")
+        for block in content:
+            if block.get("type") == "text" and block.get("text"):
+                print(f"  → {block['text'][:200]}")
+                continue
+            if block.get("type") != "tool_use":
                 continue
 
-            tool_name = block.name
-            tool_input = block.input
+            tool_name = block["name"]
+            tool_input = block["input"]
             print(f"  [{tool_name}] {json.dumps(tool_input)[:120]}")
 
             fn = TOOL_MAP.get(tool_name)
@@ -317,7 +339,7 @@ def run_agent(task: str) -> None:
 
             tool_results.append({
                 "type": "tool_result",
-                "tool_use_id": block.id,
+                "tool_use_id": block["id"],
                 "content": result,
             })
 
@@ -339,10 +361,6 @@ def run_agent(task: str) -> None:
 # ── Entry point ───────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
-    if not os.environ.get("ANTHROPIC_API_KEY"):
-        print("Error: ANTHROPIC_API_KEY not set.")
-        print("Run: export ANTHROPIC_API_KEY=your_key_here")
-        sys.exit(1)
 
     if len(sys.argv) > 1:
         task = " ".join(sys.argv[1:])

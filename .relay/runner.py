@@ -36,7 +36,6 @@ def login_rozetka(page) -> dict:
     page.goto("https://rozetka.com.ua/ua/", wait_until="domcontentloaded")
     time.sleep(2)
 
-    # Click login button
     try:
         page.locator("button.header-actions__button--user, .user-identification-button").first.click()
         time.sleep(1)
@@ -63,74 +62,128 @@ def login_rozetka(page) -> dict:
         return {"logged_in": False, "reason": str(e)}
 
 
-def search_products_api(query: str, max_price: int) -> list:
-    """Try Rozetka's internal catalog API directly (no browser needed)."""
-    headers = {
-        "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
-        "Accept": "application/json, text/plain, */*",
-        "Accept-Language": "uk-UA,uk;q=0.9",
-        "Referer": "https://rozetka.com.ua/",
-        "Origin": "https://rozetka.com.ua",
-    }
+def search_products_api_direct(query: str, max_price: int) -> list:
+    """Try multiple Rozetka API endpoints directly with session cookies."""
+    session = httpx.Client(
+        follow_redirects=True,
+        timeout=20,
+        headers={
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "Accept-Language": "uk-UA,uk;q=0.9,ru;q=0.8",
+            "Accept-Encoding": "gzip, deflate, br",
+            "DNT": "1",
+        }
+    )
+
+    # Step 1: Visit homepage to get cookies/session
+    print("Getting session cookies from homepage...")
+    try:
+        r = session.get("https://rozetka.com.ua/ua/", timeout=15)
+        print(f"Homepage: HTTP {r.status_code}, cookies: {list(r.cookies.keys())[:5]}")
+        time.sleep(1)
+    except Exception as e:
+        print(f"Homepage fetch error: {e}")
+
+    q_encoded = query.replace(' ', '%20')
+    q_plus = query.replace(' ', '+')
+
     endpoints = [
-        # Main catalog search API
-        f"https://xl-catalog-api.rozetka.com.ua/v4/goods/get?category_id=80089&text={query.replace(' ', '%20')}&price=0%3B{max_price}&sort=popular&page=1",
-        # Older API format
-        f"https://rozetka.com.ua/api/product-api/v4/goods/get?text={query.replace(' ', '%20')}&price=0;{max_price}&sort=popular",
+        # v6 search API (newer)
+        f"https://search.rozetka.com.ua/ua/search/api/v6/goods?text={q_encoded}&price=0%3B{max_price}&sort=popular&page=1",
+        # xl-catalog API
+        f"https://xl-catalog-api.rozetka.com.ua/v4/goods/get?category_id=80089&text={q_encoded}&price=0%3B{max_price}&sort=popular&page=1",
+        # Main API
+        f"https://rozetka.com.ua/api/product-api/v4/goods/get?text={q_encoded}&price=0;{max_price}&sort=popular",
+        # Search page API
+        f"https://rozetka.com.ua/ua/search/?text={q_plus}&price=0;{max_price}&sort=popular",
     ]
+
     for url in endpoints:
         try:
-            r = httpx.get(url, headers=headers, timeout=15, follow_redirects=True)
-            print(f"API {url[:60]}: HTTP {r.status_code}")
+            r = session.get(url, headers={"Referer": "https://rozetka.com.ua/ua/search/"})
+            print(f"API {url[:70]}: HTTP {r.status_code}")
             if r.status_code == 200:
-                data = r.json()
-                goods = data.get("data", {}).get("goods", [])
-                if goods:
-                    return [{"name": g.get("title", g.get("full_name", "")),
-                             "price": int(g.get("price", 0)),
-                             "url": g.get("href", g.get("url", ""))} for g in goods[:10]]
+                try:
+                    data = r.json()
+                    # v6 format
+                    if "data" in data and isinstance(data["data"], list):
+                        goods = data["data"][:10]
+                        results = [{"name": g.get("title", g.get("full_name", "")),
+                                   "price": int(g.get("price", 0)),
+                                   "url": g.get("href", g.get("url", ""))} for g in goods]
+                        results = [p for p in results if p["name"] and p["price"] > 0]
+                        if results:
+                            print(f"v6 API: {len(results)} products")
+                            return results
+                    # v4 format
+                    goods = data.get("data", {}).get("goods", [])
+                    if goods:
+                        results = [{"name": g.get("title", g.get("full_name", "")),
+                                   "price": int(g.get("price", 0)),
+                                   "url": g.get("href", g.get("url", ""))} for g in goods[:10]]
+                        results = [p for p in results if p["name"] and p["price"] > 0]
+                        if results:
+                            print(f"v4 API: {len(results)} products")
+                            return results
+                    print(f"  Response keys: {list(data.keys())[:5]}, content: {str(data)[:200]}")
+                except Exception as e:
+                    print(f"  JSON parse error: {e}, content: {r.text[:200]}")
         except Exception as e:
-            print(f"API error: {e}")
+            print(f"  Request error: {e}")
+
     return []
 
 
-def search_products(page, query: str, max_price: int) -> list:
+def search_products_browser(page, query: str, max_price: int) -> list:
+    """Browser-based search with API interception and extended waiting."""
     api_responses = []
 
-    # Intercept Rozetka's catalog API calls
     def handle_response(response):
         url = response.url
-        if any(x in url for x in ["catalog-api", "goods/get", "search", "xl-catalog"]):
+        if any(x in url for x in ["catalog-api", "goods/get", "search/api", "xl-catalog", "product-api"]):
             try:
                 body = response.json()
-                if isinstance(body, dict) and body.get("data", {}).get("goods"):
-                    api_responses.append(body)
-                    print(f"Captured API: {url[:80]} → {len(body['data']['goods'])} goods")
+                if isinstance(body, dict):
+                    # Check various response structures
+                    goods = (body.get("data", {}).get("goods") or
+                             body.get("data") if isinstance(body.get("data"), list) else None)
+                    if goods:
+                        api_responses.append({"goods": goods, "url": url})
+                        print(f"Captured API: {url[:80]} → {len(goods)} goods")
             except Exception:
                 pass
 
     page.on("response", handle_response)
+
+    # Visit homepage first to establish session
+    print("Visiting homepage first...")
+    page.goto("https://rozetka.com.ua/ua/", wait_until="domcontentloaded", timeout=30000)
+    time.sleep(3)
+    screenshot(page, "02a_homepage")
 
     search_url = (
         f"https://rozetka.com.ua/ua/search/"
         f"?text={query.replace(' ', '+')}"
         f"&price=0;{max_price}&sort=popular"
     )
+    print(f"Navigating to search: {search_url}")
     page.goto(search_url, wait_until="domcontentloaded", timeout=30000)
-    time.sleep(3)
+    time.sleep(5)
     screenshot(page, "03a_initial_load")
 
-    # Wait for actual product tiles to appear (not skeleton)
+    # Wait up to 40 seconds for product tiles
+    print("Waiting for product tiles...")
     try:
         page.wait_for_selector(
-            "app-goods-tile-default, .goods-tile__title, a.goods-tile__heading",
-            timeout=30000
+            "app-goods-tile-default, .goods-tile__title, a.goods-tile__heading, rz-catalog-tile",
+            timeout=40000
         )
         print("Product tiles appeared!")
         time.sleep(3)
     except Exception:
-        print("Product tiles didn't appear — waiting 15s more...")
-        time.sleep(15)
+        print("Product tiles didn't appear — waiting 20s more...")
+        time.sleep(20)
 
     screenshot(page, "03_search_results")
     print("Page title:", page.title())
@@ -144,7 +197,7 @@ def search_products(page, query: str, max_price: int) -> list:
     if api_responses:
         products = []
         for resp in api_responses:
-            for good in resp.get("data", {}).get("goods", [])[:10]:
+            for good in resp["goods"][:10]:
                 products.append({
                     "name": good.get("title", good.get("full_name", "")),
                     "price": int(good.get("price", 0)),
@@ -155,20 +208,23 @@ def search_products(page, query: str, max_price: int) -> list:
             print(f"API interception: {len(products)} products")
             return products[:10]
 
-    # Method 2: JS DOM extraction after full render
+    # Method 2: JS DOM extraction
     try:
         js_products = page.evaluate("""() => {
             const results = [];
-            document.querySelectorAll('app-goods-tile-default, li.catalog-grid__cell').forEach(tile => {
-                const nameEl = tile.querySelector('a.goods-tile__heading, .goods-tile__title');
-                const priceEl = tile.querySelector('.goods-tile__price-value');
-                const linkEl = tile.querySelector('a[href*="rozetka.com.ua"]');
+            document.querySelectorAll('app-goods-tile-default, li.catalog-grid__cell, rz-catalog-tile').forEach(tile => {
+                const nameEl = tile.querySelector('a.goods-tile__heading, .goods-tile__title, [class*="title"]');
+                const priceEl = tile.querySelector('.goods-tile__price-value, [class*="price-value"], [class*="price"]');
+                const linkEl = tile.querySelector('a[href*="rozetka.com.ua"], a[href*="/ua/"]');
                 if (nameEl && priceEl) {
-                    results.push({
-                        name: nameEl.textContent.trim(),
-                        price: parseInt(priceEl.textContent.replace(/\\D/g, '')) || 0,
-                        url: linkEl ? linkEl.href : ''
-                    });
+                    const priceText = priceEl.textContent.replace(/\\D/g, '');
+                    if (priceText && parseInt(priceText) > 0) {
+                        results.push({
+                            name: nameEl.textContent.trim(),
+                            price: parseInt(priceText),
+                            url: linkEl ? linkEl.href : ''
+                        });
+                    }
                 }
             });
             return results;
@@ -180,84 +236,22 @@ def search_products(page, query: str, max_price: int) -> list:
     except Exception as e:
         print(f"JS DOM error: {e}")
 
-    # Try multiple selector strategies for Rozetka's structure
-    selectors_to_try = [
-        ".goods-tile",
-        "li.catalog-grid__cell",
-        "app-goods-tile-default",
-        "[data-testid='product-item']",
-        ".product-card",
-        "rz-catalog-tile",
-    ]
+    # Log what's actually on the page
+    body_text = page.evaluate("document.body.innerText")[:3000]
+    Path(".relay/debug_body.txt").write_text(body_text)
+    print("Body snippet:", body_text[:500])
+    return []
 
-    tiles = []
-    for sel in selectors_to_try:
-        found = page.locator(sel).all()
-        if found:
-            print(f"Found {len(found)} tiles with selector: {sel}")
-            tiles = found[:10]
-            break
 
-    if not tiles:
-        # Fallback: extract from JSON-LD or page text
-        body_text = page.evaluate("document.body.innerText")[:3000]
-        Path(".relay/debug_body.txt").write_text(body_text)
-        print("No tiles found. Body snippet:", body_text[:300])
-        return []
+def search_products(page, query: str, max_price: int) -> list:
+    """Try API first, then browser fallback."""
+    # Try direct API with session cookies
+    products = search_products_api_direct(query, max_price)
+    if products:
+        return products
 
-    products = []
-    for tile in tiles:
-        try:
-            # Try multiple name selectors
-            name = ""
-            for name_sel in [".goods-tile__title", ".product-card__title", "a[title]", "h3", "h2"]:
-                try:
-                    el = tile.locator(name_sel).first
-                    if el.is_visible(timeout=1000):
-                        name = el.inner_text(timeout=1000).strip()
-                        if name:
-                            break
-                except Exception:
-                    continue
-
-            # Try multiple price selectors
-            price = 0
-            for price_sel in [
-                ".goods-tile__price-value",
-                ".product-price__big",
-                "[data-testid='price']",
-                ".price__value",
-                "span.price",
-            ]:
-                try:
-                    el = tile.locator(price_sel).first
-                    if el.is_visible(timeout=1000):
-                        price_raw = el.inner_text(timeout=1000)
-                        digits = "".join(filter(str.isdigit, price_raw))
-                        if digits:
-                            price = int(digits)
-                            break
-                except Exception:
-                    continue
-
-            # Get link
-            link = ""
-            for link_sel in ["a.goods-tile__heading", "a.goods-tile__title", "a[href*='rozetka']", "a"]:
-                try:
-                    href = tile.locator(link_sel).first.get_attribute("href", timeout=1000)
-                    if href and "rozetka" in href:
-                        link = href
-                        break
-                except Exception:
-                    continue
-
-            if name and price > 0:
-                products.append({"name": name, "price": price, "url": link})
-        except Exception as e:
-            print(f"Tile parse error: {e}")
-            continue
-
-    return products
+    print("Direct API failed, using browser with extended wait...")
+    return search_products_browser(page, query, max_price)
 
 
 def add_to_cart(page, product_url: str) -> dict:
@@ -294,7 +288,7 @@ def run():
     with sync_playwright() as p:
         browser = p.chromium.launch(
             headless=True,
-            args=["--no-sandbox", "--disable-dev-shm-usage"],
+            args=["--no-sandbox", "--disable-dev-shm-usage", "--disable-blink-features=AutomationControlled"],
         )
         context = browser.new_context(
             viewport={"width": 1440, "height": 900},
@@ -303,13 +297,17 @@ def run():
                 "AppleWebKit/537.36 (KHTML, like Gecko) "
                 "Chrome/124.0.0.0 Safari/537.36"
             ),
+            locale="uk-UA",
+            timezone_id="Europe/Kyiv",
         )
-        context.add_init_script(
-            "Object.defineProperty(navigator, 'webdriver', {get: () => undefined})"
-        )
+        context.add_init_script("""
+            Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
+            Object.defineProperty(navigator, 'plugins', {get: () => [1, 2, 3, 4, 5]});
+            Object.defineProperty(navigator, 'languages', {get: () => ['uk-UA', 'uk', 'ru']});
+            window.chrome = {runtime: {}};
+        """)
         page = context.new_page()
 
-        # Apply stealth mode to bypass Cloudflare bot detection
         if stealth_sync:
             stealth_sync(page)
             print("Stealth mode applied")
@@ -318,13 +316,7 @@ def run():
             if action == "search":
                 query = request.get("query", "")
                 max_price = request.get("max_price", 999999)
-
-                # Try direct API first (faster, no bot detection issue)
-                products = search_products_api(query, max_price)
-                if not products:
-                    print("API failed, falling back to browser...")
-                    products = search_products(page, query, max_price)
-
+                products = search_products(page, query, max_price)
                 result["status"] = "ok"
                 result["data"] = {"products": products, "count": len(products)}
 
@@ -359,6 +351,14 @@ def run():
                     "url": page.url,
                     "text": page.evaluate("document.body.innerText")[:5000],
                 }
+
+            elif action == "fetch_api":
+                # Direct API test — no browser needed
+                query = request.get("query", "")
+                max_price = request.get("max_price", 999999)
+                products = search_products_api_direct(query, max_price)
+                result["status"] = "ok"
+                result["data"] = {"products": products, "count": len(products)}
 
         except Exception:
             result["status"] = "error"

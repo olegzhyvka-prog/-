@@ -1,7 +1,7 @@
 {
   "action": "fetch_url",
   "query": "",
-  "max_price": 30000,
-  "url": "https://rozetka.com.ua/ua/monitors/c80089/price=0-30000/",
-  "timestamp": "2026-05-17T20:20:00"
+  "max_price": 999999,
+  "url": "https://hard.rozetka.com.ua/ua/monitors/c80089/cena=2000-30000;tegi128045=27-dyuymov/",
+  "timestamp": "2026-05-17T19:32:06.928403"
 }

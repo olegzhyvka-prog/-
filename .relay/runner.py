@@ -64,22 +64,90 @@ def search_products(page, query: str, max_price: int) -> list:
         f"?text={query.replace(' ', '+')}"
         f"&price=0;{max_price}&sort=popular"
     )
-    page.goto(url, wait_until="domcontentloaded", timeout=30000)
-    time.sleep(4)
+    page.goto(url, wait_until="networkidle", timeout=45000)
+    time.sleep(5)
     screenshot(page, "03_search_results")
 
-    tiles = page.locator(".goods-tile").all()[:10]
+    # Debug: save page HTML for analysis
+    Path(".relay/debug_page.html").write_text(page.content()[:50000])
+
+    # Try multiple selector strategies for Rozetka's structure
+    selectors_to_try = [
+        ".goods-tile",
+        "li.catalog-grid__cell",
+        "app-goods-tile-default",
+        "[data-testid='product-item']",
+        ".product-card",
+        "rz-catalog-tile",
+    ]
+
+    tiles = []
+    for sel in selectors_to_try:
+        found = page.locator(sel).all()
+        if found:
+            print(f"Found {len(found)} tiles with selector: {sel}")
+            tiles = found[:10]
+            break
+
+    if not tiles:
+        # Fallback: extract from JSON-LD or page text
+        body_text = page.evaluate("document.body.innerText")[:3000]
+        Path(".relay/debug_body.txt").write_text(body_text)
+        print("No tiles found. Body snippet:", body_text[:300])
+        return []
+
     products = []
     for tile in tiles:
         try:
-            name = tile.locator(".goods-tile__title").inner_text(timeout=2000).strip()
-            price_raw = tile.locator(".goods-tile__price-value").first.inner_text(timeout=2000)
-            price = int("".join(filter(str.isdigit, price_raw)))
-            link = (tile.locator("a.goods-tile__heading, a.goods-tile__title")
-                    .first.get_attribute("href") or "")
-            products.append({"name": name, "price": price, "url": link})
-        except Exception:
+            # Try multiple name selectors
+            name = ""
+            for name_sel in [".goods-tile__title", ".product-card__title", "a[title]", "h3", "h2"]:
+                try:
+                    el = tile.locator(name_sel).first
+                    if el.is_visible(timeout=1000):
+                        name = el.inner_text(timeout=1000).strip()
+                        if name:
+                            break
+                except Exception:
+                    continue
+
+            # Try multiple price selectors
+            price = 0
+            for price_sel in [
+                ".goods-tile__price-value",
+                ".product-price__big",
+                "[data-testid='price']",
+                ".price__value",
+                "span.price",
+            ]:
+                try:
+                    el = tile.locator(price_sel).first
+                    if el.is_visible(timeout=1000):
+                        price_raw = el.inner_text(timeout=1000)
+                        digits = "".join(filter(str.isdigit, price_raw))
+                        if digits:
+                            price = int(digits)
+                            break
+                except Exception:
+                    continue
+
+            # Get link
+            link = ""
+            for link_sel in ["a.goods-tile__heading", "a.goods-tile__title", "a[href*='rozetka']", "a"]:
+                try:
+                    href = tile.locator(link_sel).first.get_attribute("href", timeout=1000)
+                    if href and "rozetka" in href:
+                        link = href
+                        break
+                except Exception:
+                    continue
+
+            if name and price > 0:
+                products.append({"name": name, "price": price, "url": link})
+        except Exception as e:
+            print(f"Tile parse error: {e}")
             continue
+
     return products
 
 

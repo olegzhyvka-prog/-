@@ -59,45 +59,85 @@ def login_rozetka(page) -> dict:
 
 
 def search_products(page, query: str, max_price: int) -> list:
-    url = (
+    api_responses = []
+
+    # Intercept Rozetka's catalog API calls
+    def handle_response(response):
+        url = response.url
+        if any(x in url for x in ["catalog-api", "goods/get", "search", "xl-catalog"]):
+            try:
+                body = response.json()
+                if isinstance(body, dict) and body.get("data", {}).get("goods"):
+                    api_responses.append(body)
+                    print(f"Captured API: {url[:80]} → {len(body['data']['goods'])} goods")
+            except Exception:
+                pass
+
+    page.on("response", handle_response)
+
+    search_url = (
         f"https://rozetka.com.ua/ua/search/"
         f"?text={query.replace(' ', '+')}"
         f"&price=0;{max_price}&sort=popular"
     )
-    page.goto(url, wait_until="networkidle", timeout=45000)
-    time.sleep(6)
+    page.goto(search_url, wait_until="domcontentloaded", timeout=30000)
+
+    # Wait for actual product tiles to appear (not skeleton)
+    try:
+        page.wait_for_selector(
+            "app-goods-tile-default, .goods-tile__title, a.goods-tile__heading",
+            timeout=25000
+        )
+        time.sleep(3)
+    except Exception:
+        print("Product tiles didn't appear, trying to wait more...")
+        time.sleep(8)
+
     screenshot(page, "03_search_results")
 
-    # Debug: save page HTML for analysis
+    # Save debug HTML
     html_content = page.content()
     Path(".relay/debug_page.html").write_text(html_content[:80000])
 
-    # Try JS-based extraction first (most reliable for Angular/React SPAs)
+    # Method 1: From intercepted API responses
+    if api_responses:
+        products = []
+        for resp in api_responses:
+            for good in resp.get("data", {}).get("goods", [])[:10]:
+                products.append({
+                    "name": good.get("title", good.get("full_name", "")),
+                    "price": int(good.get("price", 0)),
+                    "url": good.get("href", good.get("url", "")),
+                })
+        products = [p for p in products if p["name"] and p["price"] > 0]
+        if products:
+            print(f"API interception: {len(products)} products")
+            return products[:10]
+
+    # Method 2: JS DOM extraction after full render
     try:
         js_products = page.evaluate("""() => {
             const results = [];
-            // Angular component approach
-            const tiles = document.querySelectorAll('li.catalog-grid__cell, .goods-tile, app-goods-tile-default');
-            tiles.forEach(tile => {
-                const nameEl = tile.querySelector('a.goods-tile__heading, .goods-tile__title, [class*="title"] a');
-                const priceEl = tile.querySelector('.goods-tile__price-value, [class*="price"] span, .price__value');
-                const linkEl = tile.querySelector('a[href*="rozetka"]');
+            document.querySelectorAll('app-goods-tile-default, li.catalog-grid__cell').forEach(tile => {
+                const nameEl = tile.querySelector('a.goods-tile__heading, .goods-tile__title');
+                const priceEl = tile.querySelector('.goods-tile__price-value');
+                const linkEl = tile.querySelector('a[href*="rozetka.com.ua"]');
                 if (nameEl && priceEl) {
-                    const priceText = priceEl.textContent.replace(/\\D/g, '');
                     results.push({
                         name: nameEl.textContent.trim(),
-                        price: parseInt(priceText) || 0,
+                        price: parseInt(priceEl.textContent.replace(/\\D/g, '')) || 0,
                         url: linkEl ? linkEl.href : ''
                     });
                 }
             });
             return results;
         }""")
+        js_products = [p for p in (js_products or []) if p["price"] > 0]
         if js_products:
-            print(f"JS extraction found {len(js_products)} products")
-            return [p for p in js_products if p['price'] > 0][:10]
+            print(f"JS DOM: {len(js_products)} products")
+            return js_products[:10]
     except Exception as e:
-        print(f"JS extraction error: {e}")
+        print(f"JS DOM error: {e}")
 
     # Try multiple selector strategies for Rozetka's structure
     selectors_to_try = [

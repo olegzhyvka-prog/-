@@ -1,5 +1,5 @@
 {
-  "action": "search",
+  "action": "fetch_api",
   "status": "ok",
   "data": {
     "products": [],

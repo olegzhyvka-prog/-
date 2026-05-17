@@ -3,6 +3,16 @@
   "status": "ok",
   "data": {
     "products": [],
-    "count": 0
+    "count": 0,
+    "debug": [
+      "rozetka homepage: HTTP 403, cookies: ['__cf_bm']",
+      "rozetka v6: HTTP 404",
+      "  response: {\"name\":\"Not Found\",\"message\":\"Сторінка не знайдена.\",\"code\":0,\"status\":404,\"previous\":{\"name\":\"Inva",
+      "rozetka xl-v4: HTTP 403",
+      "  response: <!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Typ",
+      "rozetka main-v4: HTTP 403",
+      "  response: <!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Typ",
+      "allo.ua HTTP 403"
+    ]
   }
 }

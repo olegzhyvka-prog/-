@@ -5,6 +5,7 @@ Reads .relay/request.json, executes the task, writes .relay/result.json.
 
 import json
 import os
+import re
 import time
 import traceback
 import httpx
@@ -20,12 +21,7 @@ RESULT_FILE = Path(".relay/result.json")
 SCREENSHOTS_DIR = Path(".relay/screenshots")
 SCREENSHOTS_DIR.mkdir(exist_ok=True)
 
-HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-    "Accept-Language": "uk-UA,uk;q=0.9",
-    "Accept-Encoding": "gzip, deflate, br",
-    "DNT": "1",
-}
+UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
 
 
 def screenshot(page, name: str) -> str:
@@ -39,7 +35,6 @@ def login_rozetka(page) -> dict:
     password = os.environ.get("ROZETKA_PASSWORD", "")
     if not phone or not password:
         return {"logged_in": False, "reason": "No credentials in GitHub Secrets"}
-
     page.goto("https://rozetka.com.ua/ua/", wait_until="domcontentloaded")
     time.sleep(2)
     try:
@@ -65,120 +60,110 @@ def login_rozetka(page) -> dict:
         return {"logged_in": False, "reason": str(e)}
 
 
-def search_allo(query: str, max_price: int) -> list:
-    """Search allo.ua — major Ukrainian electronics retailer with simpler API."""
+def search_hotline_browser(page, query: str, max_price: int) -> tuple:
+    """Scrape hotline.ua — Ukrainian price comparison site, simple HTML, less protected."""
     debug = []
+    q = query.replace(' ', '+')
+    url = f"https://hotline.ua/ua/search/query/?q={q}"
+
     try:
-        q = query.replace(' ', '+')
-        # Allo search page (SSR rendered)
-        url = f"https://allo.ua/ua/catalogsearch/result/?q={q}"
-        r = httpx.get(url, headers={**HEADERS, "Accept": "text/html"}, timeout=20, follow_redirects=True)
-        debug.append(f"allo.ua HTTP {r.status_code}")
+        page.goto(url, wait_until="domcontentloaded", timeout=30000)
+        time.sleep(3)
+        screenshot(page, "hotline_search")
+        debug.append(f"hotline.ua: {page.title()}")
 
-        if r.status_code == 200:
-            import re
-            # Try to find JSON-LD product data
-            json_ld = re.findall(r'<script[^>]*type="application/ld\+json"[^>]*>(.*?)</script>', r.text, re.DOTALL)
-            for block in json_ld:
-                try:
-                    data = json.loads(block)
-                    if isinstance(data, dict) and data.get("@type") == "ItemList":
-                        items = data.get("itemListElement", [])
-                        products = []
-                        for item in items[:10]:
-                            offer = item.get("item", item)
-                            price_data = offer.get("offers", {})
-                            price = int(float(price_data.get("price", 0))) if price_data else 0
-                            if price and price <= max_price:
-                                products.append({
-                                    "name": offer.get("name", ""),
-                                    "price": price,
-                                    "url": offer.get("url", ""),
-                                    "shop": "allo.ua"
-                                })
-                        if products:
-                            debug.append(f"allo.ua JSON-LD: {len(products)} products")
-                            return products, debug
-                except Exception:
-                    pass
+        # Extract products via JS from hotline's HTML structure
+        products = page.evaluate("""(maxPrice) => {
+            const results = [];
+            // hotline.ua product cards
+            const cards = document.querySelectorAll('.list-item, .hl-product-card, [class*="product-item"]');
+            cards.forEach(card => {
+                const nameEl = card.querySelector('a.name, .hl-name, h2 a, h3 a, [class*="name"] a, a[title]');
+                const priceEl = card.querySelector('.price-box span, .hl-price, [class*="price"] span, .price');
+                if (nameEl && priceEl) {
+                    const priceText = priceEl.textContent.replace(/[^0-9]/g, '');
+                    const price = parseInt(priceText);
+                    if (price > 0 && price <= maxPrice) {
+                        results.push({
+                            name: nameEl.textContent.trim() || nameEl.title,
+                            price: price,
+                            url: nameEl.href || '',
+                            shop: 'hotline.ua'
+                        });
+                    }
+                }
+            });
+            return results.slice(0, 10);
+        }""", max_price)
 
-            # Try regex extraction from HTML
-            # Allo uses data attributes or specific patterns
-            prices = re.findall(r'"price"\s*:\s*"?(\d+)"?', r.text)
-            names = re.findall(r'"name"\s*:\s*"([^"]{10,100})"', r.text)
-            urls = re.findall(r'"url"\s*:\s*"(https://allo\.ua/[^"]+)"', r.text)
-            debug.append(f"allo.ua regex: {len(names)} names, {len(prices)} prices")
-            if names and prices:
-                products = []
-                for i in range(min(len(names), len(prices), len(urls) if urls else 99, 10)):
-                    price = int(prices[i]) if prices[i].isdigit() else 0
-                    if price and price <= max_price:
-                        products.append({
-                            "name": names[i],
-                            "price": price,
-                            "url": urls[i] if i < len(urls) else "",
-                            "shop": "allo.ua"
-                        })
-                if products:
-                    return products, debug
+        debug.append(f"hotline.ua JS: {len(products)} products")
+        if products:
+            return products, debug
+
+        # Fallback: text content
+        body = page.evaluate("document.body.innerText")[:2000]
+        debug.append(f"hotline body snippet: {body[:200]}")
+        Path(".relay/debug_hotline.txt").write_text(body)
+        html = page.content()
+        Path(".relay/debug_hotline.html").write_text(html[:80000])
 
     except Exception as e:
-        debug.append(f"allo.ua error: {e}")
-    return [], debug
-
-
-def search_rozetka_api(query: str, max_price: int) -> tuple:
-    """Try multiple Rozetka API endpoints."""
-    debug = []
-    session = httpx.Client(follow_redirects=True, timeout=20, headers=HEADERS)
-
-    # Get homepage cookies first
-    try:
-        r = session.get("https://rozetka.com.ua/ua/", timeout=15)
-        debug.append(f"rozetka homepage: HTTP {r.status_code}, cookies: {list(r.cookies.keys())[:5]}")
-    except Exception as e:
-        debug.append(f"rozetka homepage error: {e}")
-
-    q = query.replace(' ', '%20')
-    endpoints = [
-        (f"https://search.rozetka.com.ua/ua/search/api/v6/goods?text={q}&price=0%3B{max_price}&sort=popular", "v6"),
-        (f"https://xl-catalog-api.rozetka.com.ua/v4/goods/get?text={q}&price=0%3B{max_price}&sort=popular&page=1", "xl-v4"),
-        (f"https://rozetka.com.ua/api/product-api/v4/goods/get?text={q}&price=0;{max_price}&sort=popular", "main-v4"),
-    ]
-
-    for url, name in endpoints:
-        try:
-            r = session.get(url, headers={"Referer": "https://rozetka.com.ua/ua/search/", "Accept": "application/json"})
-            debug.append(f"rozetka {name}: HTTP {r.status_code}")
-            if r.status_code == 200:
-                data = r.json()
-                debug.append(f"  keys: {list(data.keys())[:5]}, snippet: {str(data)[:150]}")
-                # v6 format: data is list
-                if isinstance(data.get("data"), list) and data["data"]:
-                    goods = data["data"][:10]
-                    products = [{"name": g.get("title", ""), "price": int(g.get("price", 0)),
-                                "url": g.get("href", ""), "shop": "rozetka.com.ua"} for g in goods]
-                    products = [p for p in products if p["name"] and p["price"] > 0]
-                    if products:
-                        return products, debug
-                # v4 format: data.goods
-                goods = data.get("data", {}).get("goods", [])
-                if goods:
-                    products = [{"name": g.get("title", g.get("full_name", "")), "price": int(g.get("price", 0)),
-                                "url": g.get("href", ""), "shop": "rozetka.com.ua"} for g in goods[:10]]
-                    products = [p for p in products if p["name"] and p["price"] > 0]
-                    if products:
-                        return products, debug
-            else:
-                debug.append(f"  response: {r.text[:100]}")
-        except Exception as e:
-            debug.append(f"  error: {e}")
+        debug.append(f"hotline browser error: {e}")
 
     return [], debug
 
 
-def search_rozetka_browser(page, query: str, max_price: int) -> list:
-    """Browser-based Rozetka search — last resort."""
+def search_comfy_browser(page, query: str, max_price: int) -> tuple:
+    """Scrape comfy.ua — Ukrainian electronics retailer."""
+    debug = []
+    q = query.replace(' ', '+')
+    url = f"https://comfy.ua/ua/search/?search={q}"
+    try:
+        page.goto(url, wait_until="domcontentloaded", timeout=30000)
+        time.sleep(4)
+        screenshot(page, "comfy_search")
+        debug.append(f"comfy.ua: {page.title()}")
+
+        products = page.evaluate("""(maxPrice) => {
+            const results = [];
+            const cards = document.querySelectorAll('.products-list__item, .product-card, [class*="product"]');
+            cards.forEach(card => {
+                const nameEl = card.querySelector('a.product-card__title, .product-card__name, h2, h3, a[title]');
+                const priceEl = card.querySelector('.product-card__price, .price, [class*="price"]');
+                const linkEl = card.querySelector('a[href*="comfy.ua"], a[href^="/ua/"]');
+                if (nameEl && priceEl) {
+                    const priceText = priceEl.textContent.replace(/[^0-9]/g, '');
+                    const price = parseInt(priceText);
+                    if (price > 0 && price <= maxPrice) {
+                        results.push({
+                            name: nameEl.textContent.trim() || nameEl.title,
+                            price: price,
+                            url: (linkEl && (linkEl.href.startsWith('http') ? linkEl.href : 'https://comfy.ua' + linkEl.getAttribute('href'))) || '',
+                            shop: 'comfy.ua'
+                        });
+                    }
+                }
+            });
+            return results.slice(0, 10);
+        }""", max_price)
+
+        debug.append(f"comfy.ua JS: {len(products)} products")
+        if products:
+            return products, debug
+
+        html = page.content()
+        Path(".relay/debug_comfy.html").write_text(html[:80000])
+        debug.append(f"comfy body: {page.evaluate('document.body.innerText')[:200]}")
+
+    except Exception as e:
+        debug.append(f"comfy browser error: {e}")
+
+    return [], debug
+
+
+def search_rozetka_browser_full(page, query: str, max_price: int) -> tuple:
+    """Rozetka with full cookie warmup — visits API subdomain first."""
+    debug = []
     api_responses = []
 
     def handle_response(response):
@@ -186,59 +171,58 @@ def search_rozetka_browser(page, query: str, max_price: int) -> list:
         if any(x in url for x in ["catalog-api", "goods/get", "search/api", "xl-catalog", "product-api"]):
             try:
                 body = response.json()
-                if isinstance(body, dict):
-                    goods = (body.get("data", {}).get("goods") or
-                             (body.get("data") if isinstance(body.get("data"), list) else None))
-                    if goods:
-                        api_responses.append(goods)
-                        print(f"Captured API response: {url[:80]} → {len(goods)} goods")
+                goods = (body.get("data", {}).get("goods") or
+                         (body.get("data") if isinstance(body.get("data"), list) else None))
+                if goods:
+                    api_responses.append(goods)
+                    debug.append(f"Captured: {url[:80]} → {len(goods)} items")
             except Exception:
                 pass
 
     page.on("response", handle_response)
 
-    # Visit homepage first for session
+    # Warm up: visit homepage first
     page.goto("https://rozetka.com.ua/ua/", wait_until="domcontentloaded", timeout=30000)
-    time.sleep(4)
-    screenshot(page, "02a_homepage")
+    time.sleep(5)
+    debug.append(f"Homepage: {page.title()}")
+    screenshot(page, "rz_homepage")
 
+    # Navigate to search
     search_url = f"https://rozetka.com.ua/ua/search/?text={query.replace(' ', '+')}&price=0;{max_price}&sort=popular"
     page.goto(search_url, wait_until="domcontentloaded", timeout=30000)
     time.sleep(5)
-    screenshot(page, "03a_initial_load")
+    screenshot(page, "rz_search_01")
 
+    # Wait longer for Angular to load
     try:
-        page.wait_for_selector(
-            "app-goods-tile-default, .goods-tile__title, a.goods-tile__heading",
-            timeout=45000
-        )
-        print("Product tiles appeared!")
-        time.sleep(3)
+        page.wait_for_selector("app-goods-tile-default, .goods-tile__title", timeout=50000)
+        debug.append("Product tiles appeared!")
+        time.sleep(2)
     except Exception:
-        print("No product tiles after 45s")
+        debug.append("No product tiles after 50s wait")
         time.sleep(10)
 
-    screenshot(page, "03_search_results")
-    html_content = page.content()
-    Path(".relay/debug_page.html").write_text(html_content[:80000])
+    screenshot(page, "rz_search_02")
+    html = page.content()
+    Path(".relay/debug_page.html").write_text(html[:80000])
 
     if api_responses:
         products = []
         for goods in api_responses:
             for g in goods[:10]:
-                products.append({
-                    "name": g.get("title", g.get("full_name", "")),
-                    "price": int(g.get("price", 0)),
-                    "url": g.get("href", g.get("url", "")),
-                    "shop": "rozetka.com.ua"
-                })
-        products = [p for p in products if p["name"] and p["price"] > 0]
+                p = {"name": g.get("title", g.get("full_name", "")),
+                     "price": int(g.get("price", 0)),
+                     "url": g.get("href", g.get("url", "")),
+                     "shop": "rozetka.com.ua"}
+                if p["name"] and p["price"] > 0:
+                    products.append(p)
         if products:
-            return products[:10]
+            debug.append(f"API interception: {len(products)} products")
+            return products[:10], debug
 
-    # JS DOM extraction
+    # JS DOM
     try:
-        js_products = page.evaluate("""() => {
+        js_products = page.evaluate("""(maxPrice) => {
             const results = [];
             document.querySelectorAll('app-goods-tile-default, li.catalog-grid__cell').forEach(tile => {
                 const nameEl = tile.querySelector('a.goods-tile__heading, .goods-tile__title');
@@ -246,34 +230,31 @@ def search_rozetka_browser(page, query: str, max_price: int) -> list:
                 const linkEl = tile.querySelector('a[href*="rozetka"]');
                 if (nameEl && priceEl) {
                     const price = parseInt(priceEl.textContent.replace(/\\D/g, ''));
-                    if (price > 0) {
-                        results.push({ name: nameEl.textContent.trim(), price, url: linkEl ? linkEl.href : '' });
+                    if (price > 0 && price <= maxPrice) {
+                        results.push({name: nameEl.textContent.trim(), price, url: linkEl ? linkEl.href : '', shop: 'rozetka.com.ua'});
                     }
                 }
             });
             return results;
-        }""")
+        }""", max_price)
         if js_products:
-            print(f"JS DOM: {len(js_products)} products")
-            return [dict(p, shop="rozetka.com.ua") for p in js_products[:10]]
+            debug.append(f"JS DOM: {len(js_products)} products")
+            return js_products[:10], debug
     except Exception as e:
-        print(f"JS DOM error: {e}")
+        debug.append(f"JS DOM error: {e}")
 
-    body_text = page.evaluate("document.body.innerText")[:3000]
-    Path(".relay/debug_body.txt").write_text(body_text)
-    print("Body snippet:", body_text[:500])
-    return []
+    body = page.evaluate("document.body.innerText")[:2000]
+    Path(".relay/debug_body.txt").write_text(body)
+    debug.append(f"Body snippet: {body[:200]}")
+    return [], debug
 
 
 def add_to_cart(page, product_url: str) -> dict:
     page.goto(product_url, wait_until="domcontentloaded", timeout=30000)
     time.sleep(3)
     screenshot(page, "04_product_page")
-    buy_selectors = [
-        "button.buy-button", "button.product-buy__btn", "rz-buy-button button",
-        "button:has-text('Купити')", "button:has-text('Додати в кошик')",
-    ]
-    for sel in buy_selectors:
+    for sel in ["button.buy-button", "button.product-buy__btn", "rz-buy-button button",
+                "button:has-text('Купити')", "button:has-text('Додати в кошик')"]:
         try:
             btn = page.locator(sel).first
             if btn.is_visible(timeout=2000):
@@ -295,11 +276,13 @@ def run():
     with sync_playwright() as p:
         browser = p.chromium.launch(
             headless=True,
-            args=["--no-sandbox", "--disable-dev-shm-usage", "--disable-blink-features=AutomationControlled"],
+            args=["--no-sandbox", "--disable-dev-shm-usage",
+                  "--disable-blink-features=AutomationControlled",
+                  "--disable-web-security"],
         )
         context = browser.new_context(
             viewport={"width": 1440, "height": 900},
-            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+            user_agent=UA,
             locale="uk-UA",
             timezone_id="Europe/Kyiv",
         )
@@ -312,28 +295,30 @@ def run():
         page = context.new_page()
         if stealth_sync:
             stealth_sync(page)
-            print("Stealth mode applied")
 
         try:
             if action in ("search", "fetch_api"):
                 query = request.get("query", "")
                 max_price = request.get("max_price", 999999)
                 all_debug = []
+                products = []
 
-                # 1. Try Rozetka direct API
-                products, debug = search_rozetka_api(query, max_price)
+                # 1. Try hotline.ua (price comparison, simpler HTML)
+                print("Trying hotline.ua...")
+                products, debug = search_hotline_browser(page, query, max_price)
                 all_debug.extend(debug)
 
-                # 2. Try allo.ua if Rozetka API failed
+                # 2. Try comfy.ua
                 if not products:
-                    print("Rozetka API failed, trying allo.ua...")
-                    products, debug = search_allo(query, max_price)
+                    print("Trying comfy.ua...")
+                    products, debug = search_comfy_browser(page, query, max_price)
                     all_debug.extend(debug)
 
-                # 3. Browser fallback for Rozetka
-                if not products and action == "search":
-                    print("All API attempts failed, using Rozetka browser...")
-                    products = search_rozetka_browser(page, query, max_price)
+                # 3. Try Rozetka with full warmup
+                if not products:
+                    print("Trying Rozetka with full warmup...")
+                    products, debug = search_rozetka_browser_full(page, query, max_price)
+                    all_debug.extend(debug)
 
                 result["status"] = "ok"
                 result["data"] = {"products": products, "count": len(products), "debug": all_debug}
@@ -346,7 +331,7 @@ def run():
                 if not login_result.get("logged_in"):
                     result["status"] = "login_failed"
                 else:
-                    products = search_rozetka_browser(page, query, max_price)
+                    products, _ = search_rozetka_browser_full(page, query, max_price)
                     if not products:
                         result["status"] = "no_products"
                     else:

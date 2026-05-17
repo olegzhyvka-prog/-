@@ -65,11 +65,39 @@ def search_products(page, query: str, max_price: int) -> list:
         f"&price=0;{max_price}&sort=popular"
     )
     page.goto(url, wait_until="networkidle", timeout=45000)
-    time.sleep(5)
+    time.sleep(6)
     screenshot(page, "03_search_results")
 
     # Debug: save page HTML for analysis
-    Path(".relay/debug_page.html").write_text(page.content()[:50000])
+    html_content = page.content()
+    Path(".relay/debug_page.html").write_text(html_content[:80000])
+
+    # Try JS-based extraction first (most reliable for Angular/React SPAs)
+    try:
+        js_products = page.evaluate("""() => {
+            const results = [];
+            // Angular component approach
+            const tiles = document.querySelectorAll('li.catalog-grid__cell, .goods-tile, app-goods-tile-default');
+            tiles.forEach(tile => {
+                const nameEl = tile.querySelector('a.goods-tile__heading, .goods-tile__title, [class*="title"] a');
+                const priceEl = tile.querySelector('.goods-tile__price-value, [class*="price"] span, .price__value');
+                const linkEl = tile.querySelector('a[href*="rozetka"]');
+                if (nameEl && priceEl) {
+                    const priceText = priceEl.textContent.replace(/\\D/g, '');
+                    results.push({
+                        name: nameEl.textContent.trim(),
+                        price: parseInt(priceText) || 0,
+                        url: linkEl ? linkEl.href : ''
+                    });
+                }
+            });
+            return results;
+        }""")
+        if js_products:
+            print(f"JS extraction found {len(js_products)} products")
+            return [p for p in js_products if p['price'] > 0][:10]
+    except Exception as e:
+        print(f"JS extraction error: {e}")
 
     # Try multiple selector strategies for Rozetka's structure
     selectors_to_try = [

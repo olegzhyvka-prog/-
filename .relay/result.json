@@ -1,18 +1,19 @@
 {
-  "action": "fetch_api",
+  "action": "search",
   "status": "ok",
   "data": {
     "products": [],
     "count": 0,
     "debug": [
-      "rozetka homepage: HTTP 403, cookies: ['__cf_bm']",
-      "rozetka v6: HTTP 404",
-      "  response: {\"name\":\"Not Found\",\"message\":\"Сторінка не знайдена.\",\"code\":0,\"status\":404,\"previous\":{\"name\":\"Inva",
-      "rozetka xl-v4: HTTP 403",
-      "  response: <!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Typ",
-      "rozetka main-v4: HTTP 403",
-      "  response: <!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Typ",
-      "allo.ua HTTP 403"
+      "hotline.ua: ",
+      "hotline.ua JS: 0 products",
+      "hotline body snippet: Legacy home controller has been disabled",
+      "comfy.ua: ",
+      "comfy.ua JS: 0 products",
+      "comfy body: ",
+      "Homepage: Інтернет-магазин ROZETKA™: офіційний сайт онлайн-гіпермаркету Розетка в Україні",
+      "No product tiles after 50s wait",
+      "Body snippet: rozetka.com.ua\nТриває перевірка безпеки\n\nНа цьому вебсайті використовується сервіс безпеки для захисту від зловмисних ботів. Ця сторінка відображається, поки вебсайт перевіряє, що ви не бот.\n\nRay ID: "
     ]
   }
 }

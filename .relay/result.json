@@ -5,15 +5,9 @@
     "products": [],
     "count": 0,
     "debug": [
-      "hotline.ua: ",
-      "hotline.ua JS: 0 products",
-      "hotline body snippet: Legacy home controller has been disabled",
-      "comfy.ua: ",
-      "comfy.ua JS: 0 products",
-      "comfy body: ",
-      "Homepage: Інтернет-магазин ROZETKA™: офіційний сайт онлайн-гіпермаркету Розетка в Україні",
-      "No product tiles after 50s wait",
-      "Body snippet: rozetka.com.ua\nТриває перевірка безпеки\n\nНа цьому вебсайті використовується сервіс безпеки для захисту від зловмисних ботів. Ця сторінка відображається, поки вебсайт перевіряє, що ви не бот.\n\nRay ID: "
+      "CF challenge passed: False, title after: ''",
+      "Product tiles timeout",
+      "Body: Каталог\nЗнайти\nВід дешевих до дорогих\nВід дорогих до дешевих\nЗа релевантністю\nМи в соціальних мережах\nСкануйте QR-код та встановлюйте застосунок\nІнформація про компанію\nПро нас\nУмови використання сайту\nВакансії\nКонтакти\nВсі категорії\nДопомога\nДоставка та оплата\nКредит\nГарантія\nПовернення товару\nСерв"
     ]
   }
 }

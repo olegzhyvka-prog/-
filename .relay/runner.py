@@ -10,6 +10,10 @@ import traceback
 import httpx
 from pathlib import Path
 from playwright.sync_api import sync_playwright
+try:
+    from playwright_stealth import stealth_sync
+except ImportError:
+    stealth_sync = None
 
 REQUEST_FILE = Path(".relay/request.json")
 RESULT_FILE = Path(".relay/result.json")
@@ -113,19 +117,24 @@ def search_products(page, query: str, max_price: int) -> list:
         f"&price=0;{max_price}&sort=popular"
     )
     page.goto(search_url, wait_until="domcontentloaded", timeout=30000)
+    time.sleep(3)
+    screenshot(page, "03a_initial_load")
 
     # Wait for actual product tiles to appear (not skeleton)
     try:
         page.wait_for_selector(
             "app-goods-tile-default, .goods-tile__title, a.goods-tile__heading",
-            timeout=25000
+            timeout=30000
         )
+        print("Product tiles appeared!")
         time.sleep(3)
     except Exception:
-        print("Product tiles didn't appear, trying to wait more...")
-        time.sleep(8)
+        print("Product tiles didn't appear — waiting 15s more...")
+        time.sleep(15)
 
     screenshot(page, "03_search_results")
+    print("Page title:", page.title())
+    print("Page URL:", page.url)
 
     # Save debug HTML
     html_content = page.content()
@@ -299,6 +308,11 @@ def run():
             "Object.defineProperty(navigator, 'webdriver', {get: () => undefined})"
         )
         page = context.new_page()
+
+        # Apply stealth mode to bypass Cloudflare bot detection
+        if stealth_sync:
+            stealth_sync(page)
+            print("Stealth mode applied")
 
         try:
             if action == "search":

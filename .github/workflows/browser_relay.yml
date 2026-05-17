@@ -23,7 +23,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install playwright httpx beautifulsoup4 lxml markdownify
+          pip install playwright httpx beautifulsoup4 lxml markdownify playwright-stealth
           playwright install chromium --with-deps
 
       - name: Run browser task

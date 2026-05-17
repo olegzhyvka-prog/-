@@ -17,11 +17,6 @@ from datetime import datetime
 import httpx
 from bs4 import BeautifulSoup
 from markdownify import markdownify
-try:
-    from ddgs import DDGS
-except ImportError:
-    from duckduckgo_search import DDGS
-import anthropic
 
 # ── Config ────────────────────────────────────────────────────────────────────
 
@@ -34,7 +29,6 @@ BASE_URL = os.environ.get("ANTHROPIC_BASE_URL", "https://api.anthropic.com")
 # ── Auth ──────────────────────────────────────────────────────────────────────
 
 def _get_auth() -> dict:
-    """Return httpx headers for Anthropic API auth."""
     api_key = os.environ.get("ANTHROPIC_API_KEY")
     if api_key:
         return {"x-api-key": api_key, "anthropic-version": "2023-06-01", "content-type": "application/json"}
@@ -52,43 +46,34 @@ HTTP = httpx.Client(headers=AUTH_HEADERS, timeout=120)
 
 
 def _call_api(messages: list, system: str, tools: list) -> dict:
-    """Make a raw API call to Anthropic and return the response dict."""
-    body = {"model": MODEL, "max_tokens": 4096, "system": system, "tools": tools, "messages": messages}
+    body = {"model": MODEL, "max_tokens": 8192, "system": system, "tools": tools, "messages": messages}
     r = HTTP.post(f"{BASE_URL}/v1/messages", json=body)
     r.raise_for_status()
     return r.json()
 
 # ── Tool implementations ──────────────────────────────────────────────────────
 
-def search_web(query: str, max_results: int = 8) -> str:
-    """Search the web using DuckDuckGo."""
-    try:
-        with DDGS() as ddgs:
-            results = list(ddgs.text(query, max_results=max_results))
-        if not results:
-            return "No results found."
-        lines = []
-        for i, r in enumerate(results, 1):
-            lines.append(f"[{i}] {r['title']}\nURL: {r['href']}\n{r['body']}\n")
-        return "\n".join(lines)
-    except Exception as e:
-        return f"Search error: {e}"
-
-
 def fetch_page(url: str, max_chars: int = 8000) -> str:
     """Fetch and parse a web page, returning readable text."""
-    try:
-        headers = {"User-Agent": "Mozilla/5.0 (compatible; AgentBot/1.0)"}
-        resp = httpx.get(url, headers=headers, timeout=15, follow_redirects=True)
-        resp.raise_for_status()
-        soup = BeautifulSoup(resp.text, "lxml")
-        for tag in soup(["script", "style", "nav", "footer", "header", "aside"]):
-            tag.decompose()
-        md = markdownify(str(soup), heading_style="ATX")
-        md = "\n".join(line for line in md.splitlines() if line.strip())
-        return md[:max_chars] + ("…[truncated]" if len(md) > max_chars else "")
-    except Exception as e:
-        return f"Fetch error: {e}"
+    # Try Jina reader first (works on unrestricted networks)
+    for fetch_url, headers in [
+        (f"https://r.jina.ai/{url}", {"Accept": "text/plain", "User-Agent": "Mozilla/5.0"}),
+        (url, {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36"}),
+    ]:
+        try:
+            resp = httpx.get(fetch_url, headers=headers, timeout=15, follow_redirects=True)
+            if resp.status_code == 200:
+                if "jina.ai" in fetch_url:
+                    return resp.text[:max_chars]
+                soup = BeautifulSoup(resp.text, "lxml")
+                for tag in soup(["script", "style", "nav", "footer", "header", "aside"]):
+                    tag.decompose()
+                md = markdownify(str(soup), heading_style="ATX")
+                md = "\n".join(line for line in md.splitlines() if line.strip())
+                return md[:max_chars] + ("…[truncated]" if len(md) > max_chars else "")
+        except Exception:
+            continue
+    return f"Could not fetch {url} — network restricted in this environment."
 
 
 def run_python(code: str) -> str:
@@ -154,31 +139,20 @@ def list_files(subdir: str = "") -> str:
         files = list(target.rglob("*"))
         if not files:
             return "Workspace is empty."
-        return "\n".join(
-            str(f.relative_to(WORKSPACE)) for f in files if f.is_file()
-        )
+        return "\n".join(str(f.relative_to(WORKSPACE)) for f in files if f.is_file())
     except Exception as e:
         return f"List error: {e}"
 
 
-# ── Tool definitions (for Claude) ─────────────────────────────────────────────
+# ── Tool definitions ──────────────────────────────────────────────────────────
 
-TOOLS = [
-    {
-        "name": "search_web",
-        "description": "Search the internet using DuckDuckGo. Use this to find current information, news, prices, facts, etc.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "query": {"type": "string", "description": "Search query"},
-                "max_results": {"type": "integer", "description": "Number of results (default 8)", "default": 8}
-            },
-            "required": ["query"]
-        }
-    },
+# Anthropic built-in web search (runs on Anthropic's servers — no network restriction)
+WEB_SEARCH_SERVER_TOOL = {"type": "web_search_20250305", "name": "web_search"}
+
+CUSTOM_TOOLS = [
     {
         "name": "fetch_page",
-        "description": "Fetch and read a web page. Returns the page content as readable text/markdown.",
+        "description": "Fetch and read a full web page. Use after web_search to get the full content of a URL.",
         "input_schema": {
             "type": "object",
             "properties": {
@@ -245,8 +219,9 @@ TOOLS = [
     }
 ]
 
-TOOL_MAP = {
-    "search_web": search_web,
+ALL_TOOLS = [WEB_SEARCH_SERVER_TOOL] + CUSTOM_TOOLS
+
+CUSTOM_TOOL_MAP = {
     "fetch_page": fetch_page,
     "run_python": run_python,
     "run_shell": run_shell,
@@ -259,20 +234,21 @@ SYSTEM_PROMPT = """You are an autonomous AI agent — like Manus.
 The user gives you a task and you complete it fully, step by step, without asking for help.
 
 Your capabilities:
-- search_web: search the internet for any information
-- fetch_page: read any web page in full
-- run_python: execute Python code (for calculations, data processing, file generation)
+- web_search: search the internet in real-time (runs on Anthropic servers — always works)
+- fetch_page: read the full content of a web page
+- run_python: execute Python code (calculations, data processing, file generation)
 - run_shell: run shell commands
 - write_file: save files to workspace/
 - read_file / list_files: manage files in workspace/
 
 Rules:
 1. Work AUTONOMOUSLY — don't ask the user questions, make decisions yourself
-2. Always VERIFY your results before reporting completion
-3. Save important results to files in workspace/
-4. If something fails, try an alternative approach
-5. Be thorough — complete the task fully, not halfway
-6. At the end, give a clear summary of what you did and what files were created
+2. Use web_search for any information you need from the internet
+3. Always VERIFY your results before reporting completion
+4. Save important results to files in workspace/
+5. If something fails, try an alternative approach
+6. Be thorough — complete the task fully, not halfway
+7. At the end, give a clear summary of what you did and what files were created
 
 Today's date: """ + datetime.now().strftime("%Y-%m-%d")
 
@@ -291,17 +267,27 @@ def run_agent(task: str) -> None:
         iteration += 1
         print(f"[Step {iteration}] Thinking...")
 
-        resp = _call_api(messages, SYSTEM_PROMPT, TOOLS)
+        resp = _call_api(messages, SYSTEM_PROMPT, ALL_TOOLS)
         content = resp["content"]
         stop_reason = resp["stop_reason"]
 
-        # Add assistant response to history
+        # Show any web searches that happened server-side
+        for block in content:
+            btype = block.get("type", "")
+            if btype == "server_tool_use":
+                q = block.get("input", {}).get("query", "")
+                print(f"  [web_search] {q}")
+            elif btype == "web_search_tool_result":
+                results = block.get("content", [])
+                count = len(results) if isinstance(results, list) else "?"
+                print(f"  ↳ Got {count} search results")
+
+        # Add full assistant response to history (including server tool blocks)
         messages.append({"role": "assistant", "content": content})
 
-        # Check stop reason
         if stop_reason == "end_turn":
             for block in content:
-                if block.get("type") == "text":
+                if block.get("type") == "text" and block.get("text"):
                     print(f"\n{'='*60}")
                     print("DONE:")
                     print(block["text"])
@@ -312,8 +298,9 @@ def run_agent(task: str) -> None:
             print(f"Stopped: {stop_reason}")
             break
 
-        # Process tool calls
+        # Execute custom tools
         tool_results = []
+        has_custom_tool = False
         for block in content:
             if block.get("type") == "text" and block.get("text"):
                 print(f"  → {block['text'][:200]}")
@@ -321,11 +308,12 @@ def run_agent(task: str) -> None:
             if block.get("type") != "tool_use":
                 continue
 
+            has_custom_tool = True
             tool_name = block["name"]
             tool_input = block["input"]
             print(f"  [{tool_name}] {json.dumps(tool_input)[:120]}")
 
-            fn = TOOL_MAP.get(tool_name)
+            fn = CUSTOM_TOOL_MAP.get(tool_name)
             if fn:
                 try:
                     result = fn(**tool_input)
@@ -343,7 +331,11 @@ def run_agent(task: str) -> None:
                 "content": result,
             })
 
-        messages.append({"role": "user", "content": tool_results})
+        if tool_results:
+            messages.append({"role": "user", "content": tool_results})
+        elif not has_custom_tool:
+            # Only server tools were used — continue without user turn
+            continue
 
     else:
         print(f"\nReached max iterations ({MAX_ITERATIONS}).")
@@ -361,7 +353,6 @@ def run_agent(task: str) -> None:
 # ── Entry point ───────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
-
     if len(sys.argv) > 1:
         task = " ".join(sys.argv[1:])
     else:

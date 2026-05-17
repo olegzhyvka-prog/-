@@ -7,6 +7,7 @@ import json
 import os
 import time
 import traceback
+import httpx
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 
@@ -56,6 +57,37 @@ def login_rozetka(page) -> dict:
         return {"logged_in": True}
     except Exception as e:
         return {"logged_in": False, "reason": str(e)}
+
+
+def search_products_api(query: str, max_price: int) -> list:
+    """Try Rozetka's internal catalog API directly (no browser needed)."""
+    headers = {
+        "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
+        "Accept": "application/json, text/plain, */*",
+        "Accept-Language": "uk-UA,uk;q=0.9",
+        "Referer": "https://rozetka.com.ua/",
+        "Origin": "https://rozetka.com.ua",
+    }
+    endpoints = [
+        # Main catalog search API
+        f"https://xl-catalog-api.rozetka.com.ua/v4/goods/get?category_id=80089&text={query.replace(' ', '%20')}&price=0%3B{max_price}&sort=popular&page=1",
+        # Older API format
+        f"https://rozetka.com.ua/api/product-api/v4/goods/get?text={query.replace(' ', '%20')}&price=0;{max_price}&sort=popular",
+    ]
+    for url in endpoints:
+        try:
+            r = httpx.get(url, headers=headers, timeout=15, follow_redirects=True)
+            print(f"API {url[:60]}: HTTP {r.status_code}")
+            if r.status_code == 200:
+                data = r.json()
+                goods = data.get("data", {}).get("goods", [])
+                if goods:
+                    return [{"name": g.get("title", g.get("full_name", "")),
+                             "price": int(g.get("price", 0)),
+                             "url": g.get("href", g.get("url", ""))} for g in goods[:10]]
+        except Exception as e:
+            print(f"API error: {e}")
+    return []
 
 
 def search_products(page, query: str, max_price: int) -> list:
@@ -272,7 +304,13 @@ def run():
             if action == "search":
                 query = request.get("query", "")
                 max_price = request.get("max_price", 999999)
-                products = search_products(page, query, max_price)
+
+                # Try direct API first (faster, no bot detection issue)
+                products = search_products_api(query, max_price)
+                if not products:
+                    print("API failed, falling back to browser...")
+                    products = search_products(page, query, max_price)
+
                 result["status"] = "ok"
                 result["data"] = {"products": products, "count": len(products)}
 

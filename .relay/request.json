@@ -1,7 +1,7 @@
 {
-  "action": "add_to_cart_url",
+  "action": "fetch_url",
   "query": "",
   "max_price": 30000,
   "url": "https://hard.rozetka.com.ua/ua/gigabyte-gs27fc/p397694295/",
-  "timestamp": "2026-05-17T20:30:00"
+  "timestamp": "2026-05-17T20:35:00"
 }

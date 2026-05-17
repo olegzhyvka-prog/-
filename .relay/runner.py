@@ -34,11 +34,11 @@ def wait_past_cloudflare(page, timeout_s: int = 30) -> bool:
     while time.time() < deadline:
         try:
             title = page.title()
-            content_snippet = page.evaluate("document.body.innerText[:200] if document.body else ''")
+            snippet = page.evaluate("document.body ? document.body.innerText.substring(0, 300) : ''")
         except Exception:
-            content_snippet = ""
+            snippet = ""
         if ("Just a moment" not in title and
-                "перевірка безпеки" not in content_snippet and
+                "перевірка безпеки" not in snippet and
                 "безпеки" not in title and
                 title != ""):
             return True
@@ -247,6 +247,19 @@ def run():
                         cart_result = add_to_cart(page, best["url"])
                         result["data"]["cart"] = cart_result
                         result["status"] = "ok" if cart_result["success"] else "cart_failed"
+
+            elif action == "add_to_cart_url":
+                # Add specific product (by URL) to cart — bypasses search
+                url = request.get("url", "")
+                login_result = login_rozetka(page)
+                result["data"]["login"] = login_result
+                if not login_result.get("logged_in"):
+                    result["status"] = "login_failed"
+                else:
+                    cart_result = add_to_cart(page, url)
+                    result["data"]["cart"] = cart_result
+                    result["data"]["product_url"] = url
+                    result["status"] = "ok" if cart_result["success"] else "cart_failed"
 
             elif action == "fetch_url":
                 url = request.get("url", "")

@@ -222,11 +222,11 @@ CUSTOM_TOOLS = [
         "input_schema": {
             "type": "object",
             "properties": {
-                "action": {"type": "string", "enum": ["search", "add_to_cart", "fetch_url"],
-                           "description": "What to do"},
+                "action": {"type": "string", "enum": ["search", "add_to_cart", "add_to_cart_url", "fetch_url"],
+                           "description": "What to do. IMPORTANT: For Rozetka, use 'fetch_url' with https://hard.rozetka.com.ua/ua/monitors/c80089/price=0-30000/ to browse monitors (this works!). Use 'add_to_cart_url' + specific URL to add a known product to cart. 'search' often fails due to bot detection."},
                 "query": {"type": "string", "description": "Search query (for search/add_to_cart)"},
                 "max_price": {"type": "integer", "description": "Max price filter in UAH"},
-                "url": {"type": "string", "description": "URL to fetch (for fetch_url action)"},
+                "url": {"type": "string", "description": "URL to fetch (for fetch_url or add_to_cart_url)"},
             },
             "required": ["action"]
         }

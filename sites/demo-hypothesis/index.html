@@ -1,0 +1,442 @@
+<!doctype html>
+<html lang="uk" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Vector — перевір гіпотезу за 7 днів</title>
+<meta name="description" content="Досьє, лендінг, трафік, вирок. Без трьох місяців розробки.">
+<style>
+:root{
+  --brand-300:oklch(84% .11 275);--brand-400:oklch(76% .155 275);--brand-500:oklch(67% .19 275);
+  --brand-600:oklch(58% .185 275);--acc-400:oklch(80% .14 195);
+  --ink-50:oklch(98.5% .003 275);--ink-200:oklch(92% .007 275);--ink-400:oklch(70% .011 275);
+  --ink-500:oklch(56% .012 275);--ink-800:oklch(23% .011 275);--ink-900:oklch(15.5% .010 275);
+  --ink-950:oklch(10% .009 275);
+  --bg:var(--ink-950);--raised:var(--ink-900);--fg:var(--ink-50);--muted:var(--ink-400);
+  --line:color-mix(in oklab,var(--ink-50) 9%,transparent);
+  --font:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:ui-monospace,"SF Mono","JetBrains Mono",monospace;
+  --container:1120px;--section-y:clamp(72px,9vw,132px);
+  --r-md:10px;--r-lg:16px;--r-xl:26px;--pill:999px;
+  --e-out:cubic-bezier(.16,1,.3,1);
+  --shadow-lg:0 1px 2px -1px rgb(0 0 0/.5),0 24px 56px -16px rgb(0 0 0/.62),
+              inset 0 1px 0 rgb(255 255 255/.06);
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font);
+  line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+h1,h2,h3{margin:0;line-height:1.08;letter-spacing:-.03em;font-weight:700}
+p{margin:0;max-width:62ch}
+a{color:inherit;text-decoration:none}
+.container{width:min(100% - 40px,var(--container));margin-inline:auto}
+.section{padding-block:var(--section-y)}
+:focus-visible{outline:2px solid var(--brand-400);outline-offset:3px;border-radius:8px}
+
+/* ── шум поверх усього ── */
+body::after{content:"";position:fixed;inset:0;z-index:9;pointer-events:none;opacity:.05;
+  mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+/* ── nav ── */
+nav{position:sticky;top:0;z-index:100;backdrop-filter:blur(14px) saturate(160%);
+  background:color-mix(in oklab,var(--ink-950) 72%,transparent);border-bottom:1px solid var(--line)}
+.nav-in{display:flex;align-items:center;justify-content:space-between;height:66px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:-.02em;font-size:17px}
+.nav-links{display:flex;gap:30px;font-size:14.5px;color:var(--muted)}
+.nav-links a{transition:color .15s}
+.nav-links a:hover{color:var(--fg)}
+
+/* ── кнопки ── */
+.btn{display:inline-flex;align-items:center;gap:10px;font-weight:600;font-size:15px;
+  padding:13px 24px;border-radius:var(--pill);border:1px solid transparent;cursor:pointer;
+  transition:transform .18s var(--e-out),box-shadow .25s,background .18s;font-family:inherit}
+.btn-primary{background:var(--ink-50);color:var(--ink-950);
+  box-shadow:0 0 0 1px rgb(255 255 255/.16),0 16px 40px -14px color-mix(in oklab,var(--brand-500) 85%,transparent)}
+.btn-primary:hover{transform:translateY(-2px);
+  box-shadow:0 0 0 1px rgb(255 255 255/.24),0 22px 52px -14px color-mix(in oklab,var(--brand-500) 95%,transparent)}
+.btn-ghost{border-color:var(--line);color:var(--fg)}
+.btn-ghost:hover{background:rgb(255 255 255/.05)}
+.btn-lg{padding:17px 34px;font-size:16.5px}
+
+/* ── HERO ── */
+.hero{position:relative;padding-top:clamp(72px,10vw,124px);padding-bottom:var(--section-y);
+  overflow:hidden;isolation:isolate;text-align:center}
+.hero::before{content:"";position:absolute;inset:-45% -20% auto -20%;height:150%;z-index:-2;
+  background:
+    radial-gradient(34% 40% at 22% 30%,color-mix(in oklab,var(--brand-500) 62%,transparent),transparent 68%),
+    radial-gradient(28% 34% at 80% 20%,color-mix(in oklab,var(--acc-400) 40%,transparent),transparent 70%),
+    radial-gradient(40% 40% at 55% 74%,color-mix(in oklab,var(--brand-600) 55%,transparent),transparent 70%);
+  filter:blur(78px) saturate(1.15);animation:drift 20s ease-in-out infinite alternate;will-change:transform}
+@keyframes drift{
+  0%{transform:translate3d(-3%,-2%,0) scale(1.04) rotate(0)}
+  100%{transform:translate3d(4%,3%,0) scale(1.16) rotate(6deg)}}
+.hero::after{content:"";position:absolute;inset:0;z-index:-1;
+  background-image:linear-gradient(to right,rgb(255 255 255/.035) 1px,transparent 1px),
+                   linear-gradient(to bottom,rgb(255 255 255/.035) 1px,transparent 1px);
+  background-size:58px 58px;
+  -webkit-mask-image:radial-gradient(66% 56% at 50% 26%,#000 28%,transparent 100%);
+          mask-image:radial-gradient(66% 56% at 50% 26%,#000 28%,transparent 100%)}
+.badge{display:inline-flex;align-items:center;gap:9px;padding:7px 15px 7px 9px;border-radius:var(--pill);
+  border:1px solid var(--line);background:rgb(255 255 255/.045);font-size:13.5px;color:var(--muted);
+  backdrop-filter:blur(8px)}
+.badge b{color:var(--fg);font-weight:600}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--acc-400);
+  box-shadow:0 0 0 4px color-mix(in oklab,var(--acc-400) 22%,transparent);
+  animation:pulse 2.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+h1{font-size:clamp(2.7rem,6.6vw,5rem);letter-spacing:-.042em;line-height:.99;
+  font-weight:800;margin:26px auto 0;max-width:15ch}
+h1 em{font-style:normal;background:linear-gradient(100deg,var(--brand-300),var(--acc-400));
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.lede{margin:26px auto 0;font-size:clamp(1.05rem,1.9vw,1.3rem);color:var(--muted);max-width:56ch}
+.hero-cta{display:flex;gap:13px;justify-content:center;flex-wrap:wrap;margin-top:38px}
+.hero-note{margin:18px auto 0;font-size:13.5px;color:var(--ink-500)}
+
+/* ── термінал ── */
+.term{margin:64px auto 0;max-width:820px;border-radius:var(--r-xl);border:1px solid var(--line);
+  background:color-mix(in oklab,var(--ink-900) 82%,transparent);backdrop-filter:blur(16px);
+  box-shadow:var(--shadow-lg);overflow:hidden;text-align:left}
+.term-bar{display:flex;align-items:center;gap:8px;padding:13px 17px;border-bottom:1px solid var(--line)}
+.tdot{width:11px;height:11px;border-radius:50%;background:rgb(255 255 255/.16)}
+.term-title{margin-left:10px;font-size:12.5px;color:var(--ink-500);font-family:var(--mono)}
+.term-body{padding:22px;font-family:var(--mono);font-size:13.5px;line-height:1.85;
+  overflow-x:auto;white-space:pre;tab-size:2}
+.term-body .c{color:var(--ink-500)}
+.term-body .g{color:oklch(78% .16 150)}
+.term-body .r{color:oklch(70% .19 25)}
+.term-body .y{color:oklch(84% .15 85)}
+.term-body .b{color:var(--brand-300)}
+
+/* ── логотипи ── */
+.strip{border-block:1px solid var(--line);padding-block:26px;overflow:hidden;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);
+          mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
+.strip-row{display:flex;gap:56px;width:max-content;animation:slide 34s linear infinite;
+  align-items:center;color:var(--ink-500);font-size:14px;font-weight:600;letter-spacing:.02em}
+.strip:hover .strip-row{animation-play-state:paused}
+@keyframes slide{to{transform:translateX(-50%)}}
+
+/* ── секції ── */
+.eyebrow{font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--brand-300);
+  font-weight:600;margin-bottom:16px}
+h2{font-size:clamp(2rem,3.9vw,3.05rem);letter-spacing:-.035em;max-width:18ch}
+.sec-lede{margin-top:18px;color:var(--muted);font-size:1.05rem}
+
+/* ── кроки ── */
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(232px,1fr));gap:1px;
+  margin-top:52px;background:var(--line);border:1px solid var(--line);border-radius:var(--r-lg);
+  overflow:hidden}
+.step{background:var(--bg);padding:32px 26px;position:relative;overflow:hidden;transition:background .3s}
+.step::before{content:"";position:absolute;inset:0;opacity:0;transition:opacity .35s;pointer-events:none;
+  background:radial-gradient(320px circle at var(--mx,50%) var(--my,50%),
+    color-mix(in oklab,var(--brand-500) 14%,transparent),transparent 72%)}
+.step:hover::before{opacity:1}
+.step-n{font-family:var(--mono);font-size:12px;color:var(--brand-300);letter-spacing:.1em}
+.step h3{font-size:1.22rem;margin-top:14px;letter-spacing:-.02em}
+.step p{margin-top:11px;color:var(--muted);font-size:14.5px;line-height:1.62}
+.step-t{margin-top:18px;font-family:var(--mono);font-size:11.5px;color:var(--ink-500);
+  border-top:1px solid var(--line);padding-top:14px}
+
+/* ── цифри ── */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:32px;margin-top:56px}
+.stat{border-left:2px solid color-mix(in oklab,var(--brand-500) 55%,transparent);padding-left:20px}
+.stat b{display:block;font-size:clamp(2.2rem,4.4vw,3.1rem);letter-spacing:-.04em;font-weight:800;
+  line-height:1;font-variant-numeric:tabular-nums}
+.stat span{display:block;margin-top:10px;color:var(--muted);font-size:14px}
+
+/* ── ціни ── */
+.plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(268px,1fr));gap:22px;margin-top:52px}
+.plan{border:1px solid var(--line);border-radius:var(--r-xl);padding:32px 28px;
+  background:color-mix(in oklab,var(--ink-900) 55%,transparent);position:relative;
+  display:flex;flex-direction:column}
+.plan.featured{background:var(--ink-900);border-color:transparent;isolation:isolate;
+  box-shadow:var(--shadow-lg)}
+.plan.featured::before{content:"";position:absolute;inset:-1px;border-radius:inherit;z-index:-1;
+  background:linear-gradient(160deg,var(--brand-500),transparent 42%,transparent 58%,var(--acc-400))}
+.plan-tag{position:absolute;top:-11px;left:28px;background:var(--brand-500);color:#fff;
+  font-size:11.5px;font-weight:700;padding:4px 12px;border-radius:var(--pill);letter-spacing:.02em}
+.plan h3{font-size:1.05rem;color:var(--muted);font-weight:600;letter-spacing:0}
+.price{margin-top:16px;font-size:3rem;font-weight:800;letter-spacing:-.045em;line-height:1;
+  font-variant-numeric:tabular-nums}
+.price small{font-size:.95rem;font-weight:500;color:var(--ink-500);letter-spacing:0}
+.plan ul{list-style:none;padding:0;margin:26px 0 28px;display:grid;gap:12px;font-size:14.5px;
+  color:var(--muted);flex:1}
+.plan li{display:flex;gap:11px;align-items:flex-start;line-height:1.5}
+.plan li svg{flex:none;margin-top:3px}
+.plan .btn{width:100%;justify-content:center}
+
+/* ── FAQ ── */
+.faq{margin-top:48px;border-top:1px solid var(--line);max-width:820px}
+details{border-bottom:1px solid var(--line)}
+summary{padding:22px 0;cursor:pointer;font-weight:600;font-size:1.03rem;list-style:none;
+  display:flex;justify-content:space-between;gap:20px;align-items:center;letter-spacing:-.01em}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"";width:11px;height:11px;flex:none;border-right:2px solid var(--ink-500);
+  border-bottom:2px solid var(--ink-500);transform:rotate(45deg) translateY(-3px);transition:transform .28s var(--e-out)}
+details[open] summary::after{transform:rotate(225deg) translateY(-3px)}
+details p{padding-bottom:24px;color:var(--muted);font-size:15px}
+
+/* ── фінальний CTA ── */
+.final{position:relative;text-align:center;border-radius:var(--r-xl);padding:clamp(48px,7vw,84px) 32px;
+  overflow:hidden;isolation:isolate;border:1px solid var(--line);background:var(--ink-900)}
+.final::before{content:"";position:absolute;inset:-50%;z-index:-1;filter:blur(70px);opacity:.55;
+  background:radial-gradient(38% 44% at 30% 40%,var(--brand-500),transparent 70%),
+             radial-gradient(34% 40% at 74% 60%,var(--acc-400),transparent 70%)}
+footer{border-top:1px solid var(--line);padding-block:34px;color:var(--ink-500);font-size:13.5px}
+.foot-in{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+
+/* ── reveal ── ховаємо ТІЛЬКИ якщо JS живий, інакше контент зникне назавжди ── */
+.js .reveal{opacity:0;transform:translateY(26px);
+  transition:opacity .7s var(--e-out),transform .7s var(--e-out)}
+.js .reveal.in{opacity:1;transform:none}
+
+@media (max-width:640px){
+  .nav-links{display:none}
+  .term-body{font-size:11.5px;padding:16px}
+  h1{letter-spacing:-.035em}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;
+    transition-duration:.01ms!important;scroll-behavior:auto!important}
+  .js .reveal{opacity:1;transform:none}
+}
+</style>
+</head>
+<body>
+<script>document.documentElement.classList.add("js")</script>
+
+<nav>
+  <div class="container nav-in">
+    <a class="logo" href="#">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M4 19L12 4l8 15" stroke="url(#lg)" stroke-width="2.1" stroke-linejoin="round"/>
+        <path d="M8.2 15h7.6" stroke="url(#lg)" stroke-width="2.1" stroke-linecap="round"/>
+        <defs><linearGradient id="lg" x1="4" y1="4" x2="20" y2="19">
+          <stop stop-color="#A78BFF"/><stop offset="1" stop-color="#5EE7DC"/></linearGradient></defs>
+      </svg>
+      Vector
+    </a>
+    <div class="nav-links">
+      <a href="#how">Як це працює</a>
+      <a href="#pricing">Ціни</a>
+      <a href="#faq">Питання</a>
+    </div>
+    <a class="btn btn-ghost" href="#pricing">Почати</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="container">
+    <div class="badge"><span class="dot"></span>Середній цикл перевірки — <b>6.4 дня</b></div>
+    <h1>Перевір ідею за тиждень, а не за <em>три місяці</em></h1>
+    <p class="lede">Досьє з числами, лендінг, трафік і чесний вирок. Гіпотези, які
+      не працюють, помирають на третій день — поки вони ще дешеві.</p>
+    <div class="hero-cta">
+      <a class="btn btn-primary btn-lg" href="#pricing">Перевірити гіпотезу — $290</a>
+      <a class="btn btn-ghost btn-lg" href="#how">Як це працює</a>
+    </div>
+    <p class="hero-note">Фіксована ціна · Вирок на 7-й день · Повернення якщо не встигли</p>
+
+    <div class="term">
+      <div class="term-bar">
+        <span class="tdot"></span><span class="tdot"></span><span class="tdot"></span>
+        <span class="term-title">dossier — hypothesis #14</span>
+      </div>
+      <div class="term-body">
+<span class="c">$ vector check "AI-асистент для стоматологій, $19/міс"</span>
+
+  Попит        <span class="g">✓</span>  2 400 пошуків/міс · CPC $3.10   <span class="c">Semrush, 2026-07</span>
+  Конкуренти   <span class="y">!</span>  3 гравці, лідер $49/міс         <span class="c">місце в нижньому сегменті</span>
+  LTV          <span class="c">→</span>  $114     <span class="c">(маржа 75%, утримання 8 міс)</span>
+  Стеля CAC    <span class="c">→</span>  $38
+  Реальний CAC <span class="r">✗</span>  $138     <span class="c">(CPC $3.10 ÷ CR 2.25%)</span>
+
+  <span class="r">ЛАМАЄТЬСЯ ЯКЩО</span>  CPC &gt; $0.86  або  CR &lt; 8.1%
+  Ризики       <span class="r">✗</span>  1 блокер: медичні дані — потрібна угода HIPAA
+
+  <span class="r">ВЕРДИКТ: NO-GO</span>  <span class="c">— економіка не сходиться в 3.6× на холодному трафіку</span>
+  <span class="c">Що змінило б: ціна від $79/міс АБО канал з CPC &lt; $0.9 (партнерства)</span>
+
+<span class="c">$ </span><span style="opacity:.5">▊</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="strip">
+  <div class="strip-row" aria-hidden="true">
+    <span>SEMRUSH</span><span>POSTHOG</span><span>STRIPE</span><span>META ADS</span><span>GOOGLE ADS</span>
+    <span>VERCEL</span><span>FIGMA</span><span>SEMRUSH</span><span>POSTHOG</span><span>STRIPE</span>
+    <span>META ADS</span><span>GOOGLE ADS</span><span>VERCEL</span><span>FIGMA</span>
+  </div>
+</div>
+
+<section class="section" id="how">
+  <div class="container">
+    <div class="reveal">
+      <div class="eyebrow">Процес</div>
+      <h2>Чотири кроки. Сім днів. Один вирок.</h2>
+      <p class="sec-lede">Kill-критерії записуються до запуску — щоб рішення ухвалювали цифри, а не настрій.</p>
+    </div>
+    <div class="steps">
+      <div class="step reveal"><div class="step-n">01</div><h3>Досьє</h3>
+        <p>Попит, конкуренти, юніт-економіка, ризики платформ. Межа при якій модель ламається — числом.</p>
+        <div class="step-t">День 1 · 4 години</div></div>
+      <div class="step reveal"><div class="step-n">02</div><h3>Збірка</h3>
+        <p>Лендінг з видимою ціною, трекінг подій, приймання передоплати, UTM-розмітка.</p>
+        <div class="step-t">День 2 · 1 день</div></div>
+      <div class="step reveal"><div class="step-n">03</div><h3>Ринок</h3>
+        <p>Живий трафік на чотири різні кути. Перші 48 годин не чіпаємо — алгоритм вчиться.</p>
+        <div class="step-t">Дні 3-6 · $300</div></div>
+      <div class="step reveal"><div class="step-n">04</div><h3>Вирок</h3>
+        <p>Діагноз воронки, значущість, перерахунок економіки за фактом. Kill, iterate, pivot або scale.</p>
+        <div class="step-t">День 7 · 2 години</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="reveal">
+      <div class="eyebrow">Чому це дешевше</div>
+      <h2>Гіпотеза, яку вбили на третій день, коштує $300</h2>
+    </div>
+    <div class="stats">
+      <div class="stat reveal"><b data-to="6">0</b><span>днів у середньому до вироку</span></div>
+      <div class="stat reveal"><b data-to="290">0</b><span>доларів фіксованої ціни</span></div>
+      <div class="stat reveal"><b data-to="61">0</b><span>відсотків гіпотез гинуть до лендінга</span></div>
+      <div class="stat reveal"><b data-to="4">0</b><span>кути креативу в кожному тесті</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="pricing">
+  <div class="container">
+    <div class="reveal">
+      <div class="eyebrow">Ціни</div>
+      <h2>Фіксовано. Без годинних ставок.</h2>
+      <p class="sec-lede">Ціна відома до початку. Не встигли за строк — повертаємо гроші.</p>
+    </div>
+    <div class="plans">
+      <div class="plan reveal">
+        <h3>Досьє</h3>
+        <div class="price">$90<small> / гіпотеза</small></div>
+        <ul>
+          <li><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8.4l3.2 3.2L13 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Попит, конкуренти, ціни</li>
+          <li><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8.4l3.2 3.2L13 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Юніт-економіка з межею поломки</li>
+          <li><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8.4l3.2 3.2L13 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Ризики платформ і платежів</li>
+          <li><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8.4l3.2 3.2L13 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Вердикт за 24 години</li>
+        </ul>
+        <a class="btn btn-ghost" href="#">Замовити досьє</a>
+      </div>
+      <div class="plan featured reveal">
+        <span class="plan-tag">Найчастіший вибір</span>
+        <h3>Повний тест</h3>
+        <div class="price">$290<small> + бюджет</small></div>
+        <ul>
+          <li><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8.4l3.2 3.2L13 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Все з «Досьє»</li>
+          <li><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8.4l3.2 3.2L13 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Лендінг з трекінгом і оплатою</li>
+          <li><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8.4l3.2 3.2L13 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>4 креативи під різні кути</li>
+          <li><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8.4l3.2 3.2L13 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Ведення кампанії 5 днів</li>
+          <li><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8.4l3.2 3.2L13 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Вирок з діагнозом воронки</li>
+        </ul>
+        <a class="btn btn-primary" href="#">Почати тест</a>
+      </div>
+      <div class="plan reveal">
+        <h3>Потік</h3>
+        <div class="price">$990<small> / місяць</small></div>
+        <ul>
+          <li><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8.4l3.2 3.2L13 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>4 гіпотези на місяць</li>
+          <li><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8.4l3.2 3.2L13 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Спільний лог навчань</li>
+          <li><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8.4l3.2 3.2L13 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Пріоритетна черга</li>
+          <li><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8.4l3.2 3.2L13 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Масштабування переможців</li>
+        </ul>
+        <a class="btn btn-ghost" href="#">Обговорити</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="faq">
+  <div class="container">
+    <div class="reveal">
+      <div class="eyebrow">Питання</div>
+      <h2>Що зазвичай питають</h2>
+    </div>
+    <div class="faq">
+      <details open><summary>Що як гіпотеза не спрацює?</summary>
+        <p>Це нормальний і найчастіший результат — приблизно три з п'яти гіпотез гинуть.
+        Ви отримуєте діагноз: на якому саме кроці воронки все зупинилось і що це означає
+        для наступних ідей. Мертва гіпотеза за $300 дешевша за живу за $8000.</p></details>
+      <details><summary>Чому фіксована ціна, а не години?</summary>
+        <p>Погодинна ставка створює стимул працювати довше. Фіксована — стимул давати
+        вирок швидше. Наші інтереси мають збігатися з вашими.</p></details>
+      <details><summary>Чий рекламний бюджет?</summary>
+        <p>Ваш, і йде напряму з вашого кабінету — ми його не торкаємось. Типово $250-400
+        на одну гіпотезу. Ліміт виставляється до старту.</p></details>
+      <details><summary>Ви робите сам продукт?</summary>
+        <p>Ні. Ми доводимо що його варто робити. Це різні задачі і змішувати їх —
+        конфлікт інтересів: той хто будує, завжди знайде причину будувати.</p></details>
+      <details><summary>Скільки трафіку потрібно для висновку?</summary>
+        <p>Розраховується до старту від очікуваної конверсії. Типово 400-600 візитів
+        на варіант. Менше — це шум, і ми так і скажемо, а не намалюємо графік.</p></details>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="final reveal">
+      <h2 style="max-width:20ch;margin-inline:auto">Яку ідею ви носите вже пів року?</h2>
+      <p class="lede" style="margin-inline:auto">Через тиждень ви знатимете чи вона жива.</p>
+      <div class="hero-cta"><a class="btn btn-primary btn-lg" href="#pricing">Перевірити гіпотезу</a></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container foot-in">
+    <span>© 2026 Vector · Демо-сторінка</span>
+    <span>Зверстано в Claude Code без зовнішніх зображень</span>
+  </div>
+</footer>
+
+<script>
+// поява секцій
+const io = new IntersectionObserver((es) => {
+  es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+}, { threshold: .12, rootMargin: '0px 0px -6% 0px' });
+document.querySelectorAll('.reveal').forEach((el, i) => {
+  el.style.transitionDelay = `${(i % 4) * 70}ms`;
+  io.observe(el);
+});
+
+// spotlight у картках кроків
+document.querySelectorAll('.step').forEach(card => {
+  card.addEventListener('pointermove', e => {
+    const r = card.getBoundingClientRect();
+    card.style.setProperty('--mx', `${e.clientX - r.left}px`);
+    card.style.setProperty('--my', `${e.clientY - r.top}px`);
+  });
+});
+
+// лічильники
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const cu = new IntersectionObserver(es => es.forEach(e => {
+  if (!e.isIntersecting) return;
+  const el = e.target, end = +el.dataset.to;
+  if (reduce) { el.textContent = end; cu.unobserve(el); return; }
+  const t0 = performance.now(), dur = 1100;
+  const tick = t => {
+    const p = Math.min((t - t0) / dur, 1);
+    el.textContent = Math.round(end * (1 - Math.pow(1 - p, 3)));
+    if (p < 1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+  cu.unobserve(el);
+}), { threshold: .6 });
+document.querySelectorAll('[data-to]').forEach(el => cu.observe(el));
+</script>
+</body>
+</html>

@@ -81,10 +81,11 @@ section[id]{scroll-margin-top:84px}
 .small{font-size:14.5px;line-height:1.55}
 
 /* ═══════════ СЛОТ: те що має заповнити власник ═══════════ */
-.slot{display:inline-block;padding:.05em .5em;border:1.5px dashed var(--brass-600);
+.slot{display:inline;padding:.05em .5em;border:1.5px dashed var(--brass-600);
   border-radius:var(--r-sm);background:var(--brass-100);color:var(--brass-600);
   font-family:var(--mono);font-size:.82em;font-weight:600;letter-spacing:-.01em;
-  font-style:normal;white-space:nowrap}
+  font-style:normal;overflow-wrap:anywhere;box-decoration-break:clone;
+  -webkit-box-decoration-break:clone}
 
 /* ═══════════ КНОПКИ ═══════════ */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;
@@ -133,6 +134,7 @@ nav{position:sticky;top:0;z-index:100;background:color-mix(in oklab,var(--paper)
 .hero h1{margin:20px 0 0}
 .hero .lead{margin-top:24px;max-width:36em}
 .hero-actions{display:flex;flex-wrap:wrap;gap:13px;margin-top:34px}
+@media(max-width:560px){.hero-actions{gap:11px}.hero-actions .btn{width:100%}}
 .hero-note{display:flex;align-items:flex-start;gap:9px;margin-top:20px;
   font-size:14.5px;color:var(--muted);max-width:40em}
 .hero-note svg{flex:none;margin-top:2px}
@@ -956,20 +958,27 @@ var CFG = {
 })();
 
 /* ═══════════ ПОЯВА ПРИ СКРОЛІ ═══════════
-   Клас .js вмикає початковий стан — без JS контент видимий одразу. */
+   Прикрашає готовий контент, не створює його.
+   Три страховки, щоб жодна секція не лишилась невидимою:
+     1) без JS   — клас .js не додається, початковий стан не застосовується;
+     2) без IO   — показуємо все одразу;
+     3) аварійна — через 2.5 с показуємо все, що б не сталося
+        (перехід за якорем, відновлена позиція скролу, підозрілий движок). */
 (function(){
-  document.documentElement.classList.add('js');
   var els = document.querySelectorAll('.rv');
-  if (!('IntersectionObserver' in window)){
-    els.forEach(function(el){ el.classList.add('in'); });
-    return;
-  }
+  function showAll(){ els.forEach(function(el){ el.classList.add('in'); }); }
+
+  if (!('IntersectionObserver' in window)){ showAll(); return; }
+  document.documentElement.classList.add('js');
+
   var io = new IntersectionObserver(function(entries){
     entries.forEach(function(e){
       if (e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }
     });
-  }, {threshold:.12, rootMargin:'0px 0px -8% 0px'});
+  }, {threshold:0, rootMargin:'0px 0px -5% 0px'});
   els.forEach(function(el, i){ el.style.transitionDelay = (i % 3) * 70 + 'ms'; io.observe(el); });
+
+  setTimeout(function(){ showAll(); io.disconnect(); }, 2500);
 })();
 </script>
 </body>

@@ -1,0 +1,976 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Клаузула — проєкт типового договору за три хвилини</title>
+<meta name="description" content="AI-помічник нотаріуса: збирає чернетку типового договору з ваших шаблонів і реквізитів сторін. Перевірка і посвідчення лишаються за нотаріусом.">
+<meta name="robots" content="noindex,nofollow">
+<meta property="og:title" content="Клаузула — проєкт типового договору за три хвилини">
+<meta property="og:description" content="AI-помічник нотаріуса. Ви завантажуєте свій шаблон — отримуєте чернетку на вичитку.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231b2438'/%3E%3Cpath d='M10 9h9l3.5 3.5V23a1 1 0 0 1-1 1H10a1 1 0 0 1-1-1V10a1 1 0 0 1 1-1z' fill='none' stroke='%23d9a441' stroke-width='1.6'/%3E%3Cpath d='M12 15.5h8M12 18.5h5.5' stroke='%23d9a441' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E">
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     ⚠️  ПЕРЕД ЗАЛИВОМ ТРАФІКУ — ЗАПОВНИТИ. Усі місця позначені
+         жовтим пунктиром на сторінці і класом .slot у розмітці.
+         Знайти все одразу:  grep -n 'slot"' index.html
+
+     1. CFG.priceSolo / CFG.priceOffice — ціна. Я її НЕ вигадував.
+     2. CFG.formEndpoint — поки 'REPLACE_ME' форма НЕ надсилає і
+        показує помилку. Це навмисно: краще видима помилка,
+        ніж тихо втрачені заявки.
+     3. CFG.pilotSeats  — скільки місць у пілоті. Обіцянку треба виконати.
+     4. .slot у FAQ «де зберігаються дані» — юридично значуще твердження.
+     5. .slot у футері — юрособа/ФОП, email, політика конфіденційності.
+        Без політики + контактів Meta і Google відхиляють оголошення.
+     6. Аналітика: підключити PostHog (див. <script> у кінці) і
+        увімкнути записи сесій.
+     ═══════════════════════════════════════════════════════════════════ -->
+<style>
+/* ═══════════ ТОКЕНИ — brand/notary/tokens.css ═══════════ */
+:root{
+  --paper:oklch(98.8% .004 85);--paper-2:oklch(96.6% .006 85);--paper-3:oklch(94.2% .008 85);
+  --ink-900:oklch(21% .035 258);--ink-700:oklch(34% .04 258);--ink-500:oklch(50% .028 258);
+  --ink-400:oklch(61% .022 258);
+  --brand-900:oklch(26% .07 258);--brand-700:oklch(38% .095 258);--brand-600:oklch(45% .105 258);
+  --brand-500:oklch(54% .11 258);--brand-100:oklch(93% .025 258);
+  --brass-600:oklch(58% .105 75);--brass-500:oklch(70% .125 75);--brass-300:oklch(86% .075 78);
+  --brass-100:oklch(95% .035 80);
+  --ok-600:oklch(52% .11 155);--warn-500:oklch(72% .15 65);
+  --bg:var(--paper);--surface:oklch(100% 0 0);--fg:var(--ink-900);--muted:var(--ink-500);
+  --line:color-mix(in oklab,var(--ink-900) 12%,transparent);
+  --line-soft:color-mix(in oklab,var(--ink-900) 7%,transparent);
+  --font-display:ui-serif,Georgia,"Times New Roman","Liberation Serif",serif;
+  --font:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
+  --mono:ui-monospace,"SF Mono","JetBrains Mono","DejaVu Sans Mono",monospace;
+  --container:1120px;--container-nr:720px;--section-y:clamp(96px,11vw,160px);
+  --r-sm:8px;--r-md:12px;--r-lg:18px;--r-xl:26px;--pill:999px;
+  --e-out:cubic-bezier(.16,1,.3,1);
+  --shadow-sm:0 1px 2px rgb(20 28 45/.06),0 2px 6px -2px rgb(20 28 45/.08);
+  --shadow-md:0 2px 4px -2px rgb(20 28 45/.08),0 12px 28px -10px rgb(20 28 45/.14);
+  --shadow-lg:0 2px 6px -2px rgb(20 28 45/.09),0 30px 60px -22px rgb(20 28 45/.20);
+}
+
+/* ═══════════ БАЗА ═══════════ */
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font);
+  font-size:17px;line-height:1.62;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+h1,h2,h3,h4{margin:0;font-family:var(--font-display);font-weight:600;
+  line-height:1.06;letter-spacing:-.025em;text-wrap:balance}
+p{margin:0}
+img,svg{max-width:100%;height:auto;display:block}
+a{color:inherit;text-decoration:none}
+button,input,select,textarea{font:inherit;color:inherit}
+.container{width:min(100% - 40px,var(--container));margin-inline:auto}
+.narrow{width:min(100%,var(--container-nr));margin-inline:auto}
+.section{padding-block:var(--section-y)}
+section[id]{scroll-margin-top:84px}
+:focus-visible{outline:2.5px solid var(--brand-500);outline-offset:3px;border-radius:6px}
+::selection{background:var(--brass-300);color:var(--ink-900)}
+
+/* ═══════════ ТИПОГРАФІКА ═══════════ */
+.h1{font-size:clamp(40px,6.6vw,72px);letter-spacing:-.032em}
+.h2{font-size:clamp(31px,4.2vw,46px);letter-spacing:-.028em}
+.h3{font-size:clamp(20px,2.2vw,23px);letter-spacing:-.018em;line-height:1.25}
+.eyebrow{font-family:var(--font);font-size:12.5px;font-weight:600;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--brand-600)}
+.lead{font-size:clamp(17.5px,1.9vw,20.5px);line-height:1.58;color:var(--ink-700)}
+.muted{color:var(--muted)}
+.small{font-size:14.5px;line-height:1.55}
+
+/* ═══════════ СЛОТ: те що має заповнити власник ═══════════ */
+.slot{display:inline-block;padding:.05em .5em;border:1.5px dashed var(--brass-600);
+  border-radius:var(--r-sm);background:var(--brass-100);color:var(--brass-600);
+  font-family:var(--mono);font-size:.82em;font-weight:600;letter-spacing:-.01em;
+  font-style:normal;white-space:nowrap}
+
+/* ═══════════ КНОПКИ ═══════════ */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;
+  font-family:var(--font);font-weight:600;font-size:16px;letter-spacing:-.005em;
+  padding:14px 26px;border-radius:var(--pill);border:1.5px solid transparent;
+  cursor:pointer;text-align:center;
+  transition:transform .2s var(--e-out),box-shadow .25s var(--e-out),background .18s}
+.btn-primary{background:var(--brand-700);color:oklch(99% .004 85);box-shadow:var(--shadow-md)}
+.btn-primary:hover{background:var(--brand-600);transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+.btn-ghost{border-color:var(--line);color:var(--ink-700);background:var(--surface)}
+.btn-ghost:hover{border-color:var(--brand-500);color:var(--brand-700);transform:translateY(-2px)}
+.btn-lg{padding:17px 34px;font-size:17px}
+.btn-block{width:100%}
+
+/* ═══════════ НАВІГАЦІЯ ═══════════ */
+nav{position:sticky;top:0;z-index:100;background:color-mix(in oklab,var(--paper) 86%,transparent);
+  backdrop-filter:blur(12px) saturate(150%);border-bottom:1px solid var(--line-soft)}
+.nav-in{display:flex;align-items:center;justify-content:space-between;gap:20px;height:64px}
+.logo{display:flex;align-items:center;gap:10px;font-family:var(--font-display);
+  font-weight:600;font-size:19.5px;letter-spacing:-.02em}
+.logo svg{flex:none}
+.nav-links{display:flex;gap:28px;font-size:15px;color:var(--ink-700)}
+.nav-links a{transition:color .15s}
+.nav-links a:hover{color:var(--brand-600)}
+.nav-cta{display:inline-flex}
+@media(max-width:860px){.nav-links{display:none}}
+@media(max-width:430px){.nav-cta{padding:11px 17px;font-size:14.5px}.logo{font-size:18px}}
+
+/* ═══════════ ГЕРОЙ ═══════════ */
+.hero{position:relative;isolation:isolate;overflow:hidden;
+  padding-top:clamp(56px,7vw,92px);padding-bottom:clamp(72px,8vw,116px)}
+/* ambient: тепле світло згори-зліва + сітка бланка */
+.hero::before{content:"";position:absolute;inset:-30% -10% auto -25%;height:130%;z-index:-2;
+  background:
+    radial-gradient(38% 46% at 18% 22%,color-mix(in oklab,var(--brass-300) 52%,transparent),transparent 70%),
+    radial-gradient(42% 44% at 82% 12%,color-mix(in oklab,var(--brand-100) 88%,transparent),transparent 72%);
+  filter:blur(46px)}
+.hero::after{content:"";position:absolute;inset:0;z-index:-1;
+  background-image:linear-gradient(to right,color-mix(in oklab,var(--ink-900) 5%,transparent) 1px,transparent 1px),
+                   linear-gradient(to bottom,color-mix(in oklab,var(--ink-900) 5%,transparent) 1px,transparent 1px);
+  background-size:54px 54px;
+  -webkit-mask-image:radial-gradient(72% 62% at 42% 34%,#000 12%,transparent 100%);
+          mask-image:radial-gradient(72% 62% at 42% 34%,#000 12%,transparent 100%)}
+.hero-grid{display:grid;grid-template-columns:minmax(0,1.06fr) minmax(0,.94fr);
+  gap:clamp(40px,5vw,72px);align-items:center}
+.hero h1{margin:20px 0 0}
+.hero .lead{margin-top:24px;max-width:36em}
+.hero-actions{display:flex;flex-wrap:wrap;gap:13px;margin-top:34px}
+.hero-note{display:flex;align-items:flex-start;gap:9px;margin-top:20px;
+  font-size:14.5px;color:var(--muted);max-width:40em}
+.hero-note svg{flex:none;margin-top:2px}
+@media(max-width:940px){
+  .hero-grid{grid-template-columns:1fr;gap:48px}
+  .hero-visual{order:2;max-width:520px;margin-inline:auto;width:100%}
+}
+
+/* ── ГЕРОЙ-ЕФЕКТ: документ, що збирається (один на сторінку) ── */
+.doc{position:relative;background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--r-lg);box-shadow:var(--shadow-lg);padding:30px 30px 34px;
+  overflow:hidden;transform:rotate(-.5deg)}
+.doc::before{content:"";position:absolute;left:0;right:0;top:0;height:4px;
+  background:linear-gradient(90deg,var(--brand-700),var(--brass-500))}
+/* «сканер» — рухається лише transform */
+.doc::after{content:"";position:absolute;left:0;right:0;top:0;height:44%;pointer-events:none;
+  background:linear-gradient(180deg,transparent,color-mix(in oklab,var(--brass-300) 34%,transparent) 62%,transparent);
+  animation:scan 5.2s var(--e-out) infinite;will-change:transform}
+@keyframes scan{0%{transform:translateY(-46%)}55%{transform:translateY(232%)}100%{transform:translateY(232%)}}
+.doc-head{display:flex;align-items:center;justify-content:space-between;gap:14px;
+  padding-bottom:16px;border-bottom:1px solid var(--line-soft)}
+.doc-kicker{font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--ink-400)}
+.doc-badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;
+  padding:5px 11px;border-radius:var(--pill);background:var(--brand-100);color:var(--brand-700)}
+.doc-title{font-family:var(--font-display);font-size:19px;letter-spacing:-.02em;margin-top:16px}
+.doc-lines{margin-top:16px;display:flex;flex-direction:column;gap:11px}
+.ln{height:9px;border-radius:4px;background:color-mix(in oklab,var(--ink-900) 11%,transparent);
+  animation:lineIn .55s var(--e-out) both}
+.ln.f{background:color-mix(in oklab,var(--brand-500) 26%,transparent)}
+.ln.hl{background:color-mix(in oklab,var(--brass-500) 46%,transparent)}
+@keyframes lineIn{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:none}}
+.doc-foot{display:flex;align-items:center;gap:12px;margin-top:24px;padding-top:18px;
+  border-top:1px solid var(--line-soft)}
+.seal{flex:none;animation:sealIn .6s var(--e-out) 1.5s both}
+@keyframes sealIn{from{opacity:0;transform:scale(.82) rotate(-12deg)}to{opacity:1;transform:none}}
+.doc-foot-txt{font-size:13px;line-height:1.4;color:var(--muted)}
+.doc-tag{position:absolute;right:-10px;bottom:26px;background:var(--ink-900);
+  color:var(--paper);font-size:12.5px;font-weight:600;padding:9px 15px;
+  border-radius:var(--pill);box-shadow:var(--shadow-md);
+  animation:tagIn .5s var(--e-out) 1.9s both}
+@keyframes tagIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* ═══════════ ПРОБЛЕМА ═══════════ */
+.band{background:var(--paper-2);border-block:1px solid var(--line-soft)}
+.sec-head{max-width:30em}
+.sec-head .h2{margin-top:16px}
+.sec-head p{margin-top:20px}
+.cards-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;margin-top:56px}
+@media(max-width:880px){.cards-3{grid-template-columns:1fr;gap:18px;margin-top:44px}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);
+  padding:32px 28px;box-shadow:var(--shadow-sm)}
+.card .ic{width:44px;height:44px;border-radius:var(--r-md);display:grid;place-items:center;
+  background:var(--brand-100);color:var(--brand-700);margin-bottom:20px}
+.card h3{margin-bottom:12px}
+.card p{color:var(--ink-700);font-size:16px;line-height:1.58}
+
+/* ═══════════ ЯК ЦЕ ПРАЦЮЄ ═══════════ */
+.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;margin-top:60px;
+  border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;background:var(--surface)}
+.step{padding:38px 32px;border-right:1px solid var(--line)}
+.step:last-child{border-right:none}
+.step-n{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--brass-600);
+  letter-spacing:.08em}
+.step h3{margin:14px 0 12px}
+.step p{color:var(--ink-700);font-size:16px;line-height:1.58}
+@media(max-width:880px){
+  .steps{grid-template-columns:1fr;margin-top:44px}
+  .step{border-right:none;border-bottom:1px solid var(--line);padding:30px 26px}
+  .step:last-child{border-bottom:none}
+}
+
+/* ═══════════ МЕЖІ ВІДПОВІДАЛЬНОСТІ ═══════════ */
+.limits{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;margin-top:52px}
+@media(max-width:880px){.limits{grid-template-columns:1fr;gap:18px;margin-top:40px}}
+.limit{border:1px solid var(--line);border-radius:var(--r-lg);padding:30px 28px;background:var(--surface)}
+.limit h3{font-size:19px;margin-bottom:18px;display:flex;align-items:center;gap:10px}
+.limit ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:13px}
+.limit li{display:flex;gap:11px;align-items:flex-start;font-size:16px;line-height:1.5;color:var(--ink-700)}
+.limit li svg{flex:none;margin-top:3px}
+
+/* ═══════════ ЦІНИ ═══════════ */
+.plans{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;margin-top:56px;
+  align-items:start}
+@media(max-width:880px){.plans{grid-template-columns:1fr;gap:18px;margin-top:44px}}
+.plan{position:relative;background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--r-xl);padding:38px 32px;box-shadow:var(--shadow-sm)}
+.plan.featured{border-color:var(--brand-500);box-shadow:var(--shadow-lg)}
+.plan-badge{position:absolute;top:-13px;left:32px;background:var(--brand-700);color:var(--paper);
+  font-size:12px;font-weight:600;letter-spacing:.02em;padding:6px 14px;border-radius:var(--pill)}
+.plan h3{font-size:23px}
+.plan-for{margin-top:8px;font-size:15px;color:var(--muted)}
+.price{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin:26px 0 6px}
+.price-n{font-family:var(--font-display);font-size:clamp(34px,4vw,42px);letter-spacing:-.03em;
+  line-height:1}
+.price-per{font-size:15.5px;color:var(--muted)}
+.plan-note{font-size:14px;color:var(--muted);min-height:1.4em}
+.plan ul{margin:26px 0 30px;padding:0;list-style:none;display:flex;flex-direction:column;gap:13px}
+.plan li{display:flex;gap:11px;align-items:flex-start;font-size:15.5px;line-height:1.5;color:var(--ink-700)}
+.plan li svg{flex:none;margin-top:3px;color:var(--ok-600)}
+.pricing-foot{margin-top:32px;font-size:15px;color:var(--muted);text-align:center;
+  max-width:46em;margin-inline:auto}
+
+/* ═══════════ ФОРМА ═══════════ */
+.form-wrap{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);
+  gap:clamp(36px,5vw,64px);align-items:start}
+@media(max-width:940px){.form-wrap{grid-template-columns:1fr;gap:40px}}
+.form-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-xl);
+  padding:clamp(26px,3.4vw,40px);box-shadow:var(--shadow-lg)}
+.field{margin-bottom:18px}
+.field label{display:block;font-size:14.5px;font-weight:600;margin-bottom:7px;color:var(--ink-700)}
+.field .req{color:var(--brass-600)}
+.field input,.field select{width:100%;padding:13px 15px;border:1.5px solid var(--line);
+  border-radius:var(--r-md);background:var(--paper);font-size:16px;
+  transition:border-color .16s,box-shadow .16s}
+.field input:focus,.field select:focus{outline:none;border-color:var(--brand-500);
+  box-shadow:0 0 0 4px color-mix(in oklab,var(--brand-500) 14%,transparent)}
+.field select{appearance:none;cursor:pointer;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'%3E%3Cpath d='M1 1.5 7 7.5l6-6' fill='none' stroke='%23566' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 15px center;padding-right:42px}
+.row-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:520px){.row-2{grid-template-columns:1fr;gap:0}}
+.consent{display:flex;gap:11px;align-items:flex-start;margin:22px 0 24px;
+  font-size:13.5px;line-height:1.5;color:var(--muted)}
+.consent input{flex:none;width:19px;height:19px;margin-top:1px;accent-color:var(--brand-600);cursor:pointer}
+.form-err{display:none;margin-top:16px;padding:13px 16px;border-radius:var(--r-md);
+  background:color-mix(in oklab,var(--warn-500) 18%,var(--surface));
+  border:1.5px solid var(--warn-500);font-size:14.5px;color:var(--ink-900)}
+.form-err.on{display:block}
+.form-ok{display:none;text-align:center;padding:20px 4px}
+.form-ok.on{display:block}
+.form-ok h3{font-size:24px;margin:18px 0 12px}
+.form-ok p{color:var(--ink-700);max-width:34em;margin-inline:auto}
+.form-side ul{margin:26px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:18px}
+.form-side li{display:flex;gap:13px;align-items:flex-start}
+.form-side li svg{flex:none;margin-top:3px;color:var(--brand-600)}
+.form-side li b{display:block;font-size:16px;margin-bottom:3px}
+.form-side li span{font-size:15px;color:var(--ink-700);line-height:1.5}
+
+/* ═══════════ FAQ ═══════════ */
+.faq{margin-top:52px;border-top:1px solid var(--line)}
+details{border-bottom:1px solid var(--line)}
+details summary{list-style:none;cursor:pointer;padding:24px 44px 24px 0;position:relative;
+  font-family:var(--font-display);font-size:clamp(18px,2vw,20px);letter-spacing:-.018em;
+  line-height:1.35;font-weight:600}
+details summary::-webkit-details-marker{display:none}
+details summary::after{content:"";position:absolute;right:6px;top:50%;width:13px;height:13px;
+  margin-top:-8px;border-right:2px solid var(--brand-600);border-bottom:2px solid var(--brand-600);
+  transform:rotate(45deg);transition:transform .22s var(--e-out)}
+details[open] summary::after{transform:rotate(-135deg);margin-top:-3px}
+details .ans{padding:0 8px 26px 0;color:var(--ink-700);font-size:16.5px;line-height:1.6;max-width:60em}
+details .ans p+p{margin-top:12px}
+
+/* ═══════════ ФІНАЛЬНИЙ CTA ═══════════ */
+.final{position:relative;overflow:hidden;background:var(--brand-900);color:var(--paper);
+  isolation:isolate}
+.final::before{content:"";position:absolute;inset:auto -10% -60% -10%;height:120%;z-index:-1;
+  background:radial-gradient(46% 60% at 50% 100%,color-mix(in oklab,var(--brass-500) 32%,transparent),transparent 72%);
+  filter:blur(50px)}
+.final .h2{color:var(--paper)}
+.final p{color:color-mix(in oklab,var(--paper) 76%,var(--brand-900));margin-top:20px}
+.final-in{text-align:center}
+.final .btn-primary{background:var(--paper);color:var(--brand-900);margin-top:34px}
+.final .btn-primary:hover{background:oklch(100% 0 0)}
+
+/* ═══════════ ФУТЕР ═══════════ */
+footer{background:var(--paper-2);border-top:1px solid var(--line);padding-block:52px}
+.foot-in{display:flex;flex-wrap:wrap;gap:28px;justify-content:space-between;align-items:flex-start}
+.foot-links{display:flex;flex-wrap:wrap;gap:22px;font-size:14.5px;color:var(--ink-700)}
+.foot-links a:hover{color:var(--brand-600)}
+.foot-legal{margin-top:26px;padding-top:22px;border-top:1px solid var(--line-soft);
+  font-size:13.5px;color:var(--ink-400);line-height:1.6;max-width:70em}
+
+/* ═══════════ ПОЯВА ПРИ СКРОЛІ (тільки якщо є JS) ═══════════ */
+.js .rv{opacity:0;transform:translateY(18px);
+  transition:opacity .6s var(--e-out),transform .6s var(--e-out)}
+.js .rv.in{opacity:1;transform:none}
+
+/* ═══════════ ЗМЕНШЕНИЙ РУХ ═══════════ */
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  .ln,.seal,.doc-tag{opacity:1!important;transform:none!important}
+  .js .rv{opacity:1!important;transform:none!important}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════ НАВІГАЦІЯ ══════════ -->
+<nav>
+  <div class="container nav-in">
+    <a href="#top" class="logo" aria-label="Клаузула — на початок">
+      <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true">
+        <rect width="32" height="32" rx="7" fill="var(--brand-900)"/>
+        <path d="M10 9h9l3.5 3.5V23a1 1 0 0 1-1 1H10a1 1 0 0 1-1-1V10a1 1 0 0 1 1-1z"
+              fill="none" stroke="var(--brass-500)" stroke-width="1.6"/>
+        <path d="M12 15.5h8M12 18.5h5.5" stroke="var(--brass-500)" stroke-width="1.6" stroke-linecap="round"/>
+      </svg>
+      Клаузула
+    </a>
+    <div class="nav-links">
+      <a href="#problem">Навіщо</a>
+      <a href="#how">Як працює</a>
+      <a href="#limits">Межі</a>
+      <a href="#pricing">Ціни</a>
+      <a href="#faq">Питання</a>
+    </div>
+    <a href="#request" class="btn btn-primary nav-cta" data-cta="nav">Ранній доступ</a>
+  </div>
+</nav>
+
+<!-- ══════════ ГЕРОЙ ══════════ -->
+<header class="hero" id="top">
+  <div class="container hero-grid">
+    <div>
+      <span class="eyebrow">Для приватних і державних нотаріусів</span>
+      <h1 class="h1">Проєкт типового договору&nbsp;— за три хвилини, а не за годину</h1>
+      <p class="lead">
+        Клаузула збирає чернетку договору купівлі-продажу, дарування, застави чи найму
+        з <b>ваших</b> шаблонів і реквізитів сторін. Ви вичитуєте, виправляєте
+        і посвідчуєте. Рішення і відповідальність лишаються за нотаріусом.
+      </p>
+      <div class="hero-actions">
+        <a href="#request" class="btn btn-primary btn-lg" data-cta="hero">Отримати ранній доступ</a>
+        <a href="#pricing" class="btn btn-ghost btn-lg" data-cta="hero-pricing">Подивитись ціни</a>
+      </div>
+      <p class="hero-note">
+        <svg width="17" height="17" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <circle cx="10" cy="10" r="8.2" stroke="var(--brass-600)" stroke-width="1.5"/>
+          <path d="M10 6.2v4.6M10 13.6h.01" stroke="var(--brass-600)" stroke-width="1.7" stroke-linecap="round"/>
+        </svg>
+        <span>Пілот на <span class="slot">N</span> контор. На цьому етапі оплата не списується&nbsp;— спершу показуємо роботу на ваших шаблонах.</span>
+      </p>
+    </div>
+
+    <!-- ─── ГЕРОЙ-ЕФЕКТ: документ, що збирається ─── -->
+    <div class="hero-visual">
+      <div class="doc" role="img"
+           aria-label="Приклад згенерованої чернетки договору купівлі-продажу з підсвіченими місцями, що потребують перевірки нотаріуса">
+        <div class="doc-head">
+          <span class="doc-kicker">Чернетка · .docx</span>
+          <span class="doc-badge">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M2.5 8.4l3.4 3.4 7.6-7.6" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Готово до вичитки
+          </span>
+        </div>
+        <p class="doc-title">Договір купівлі-продажу квартири</p>
+        <div class="doc-lines">
+          <div class="ln f" style="width:88%;animation-delay:.15s"></div>
+          <div class="ln"   style="width:96%;animation-delay:.27s"></div>
+          <div class="ln"   style="width:72%;animation-delay:.39s"></div>
+          <div class="ln hl" style="width:84%;animation-delay:.51s"></div>
+          <div class="ln"   style="width:93%;animation-delay:.63s"></div>
+          <div class="ln"   style="width:61%;animation-delay:.75s"></div>
+          <div class="ln f" style="width:78%;animation-delay:.87s"></div>
+          <div class="ln"   style="width:89%;animation-delay:.99s"></div>
+        </div>
+        <div class="doc-foot">
+          <svg class="seal" width="42" height="42" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+            <circle cx="22" cy="22" r="17" stroke="var(--brass-600)" stroke-width="1.6"/>
+            <circle cx="22" cy="22" r="13" stroke="var(--brass-600)" stroke-width="1" opacity=".6"/>
+            <path d="M15.5 22.4l4.4 4.4 8.6-8.8" stroke="var(--brass-600)" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="doc-foot-txt">
+            <b>2 місця</b> підсвічено для перевірки:<br>кадастровий номер і частка власності
+          </span>
+        </div>
+        <span class="doc-tag">3 хв 12 с</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ══════════ ПРОБЛЕМА ══════════ -->
+<section class="section band" id="problem">
+  <div class="container">
+    <div class="sec-head rv">
+      <span class="eyebrow">Знайомо?</span>
+      <h2 class="h2">Типовий договір забирає час як унікальний</h2>
+      <p class="lead">Хоча відрізняється в ньому переважно те, що можна перенести з документів сторін.</p>
+    </div>
+    <div class="cards-3">
+      <article class="card rv">
+        <div class="ic">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M12 6.5V12l3.5 2.2" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="12" cy="12" r="8.6" stroke="currentColor" stroke-width="1.9"/>
+          </svg>
+        </div>
+        <h3 class="h3">Ті самі сторінки — щоразу вручну</h3>
+        <p>Структура договору не змінюється роками. Змінюються прізвища, адреси, суми
+           і номери. А набирається все одно повний текст.</p>
+      </article>
+      <article class="card rv">
+        <div class="ic">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M12 4.2l8.2 14.3H3.8L12 4.2z" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/>
+            <path d="M12 10v3.4M12 16.2h.01" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h3 class="h3">Ціна описки — переробка</h3>
+        <p>Одна цифра в кадастровому номері чи в частці власності — і документ
+           повертається до вас, а сторони приходять удруге.</p>
+      </article>
+      <article class="card rv">
+        <div class="ic">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle cx="9" cy="8.4" r="3.4" stroke="currentColor" stroke-width="1.9"/>
+            <path d="M3.4 19.4c.5-3.2 2.9-5 5.6-5s5.1 1.8 5.6 5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
+            <path d="M16.6 6.6h4.2M16.6 10.2h4.2M16.6 13.8h2.6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h3 class="h3">Черга чекає, поки ви форматуєте</h3>
+        <p>Оплачується консультація, перевірка реєстрів і посвідчення. А години
+           витрачаються на набір і вирівнювання абзаців.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ ЯК ЦЕ ПРАЦЮЄ ══════════ -->
+<section class="section" id="how">
+  <div class="container">
+    <div class="sec-head rv">
+      <span class="eyebrow">Як це працює</span>
+      <h2 class="h2">Три кроки. Ваші формулювання, не чужі</h2>
+      <p class="lead">Клаузула не приносить власних шаблонів «з інтернету». Вона працює
+        на тих текстах, які ви вже використовуєте і яким довіряєте.</p>
+    </div>
+    <div class="steps rv">
+      <div class="step">
+        <span class="step-n">КРОК 01</span>
+        <h3 class="h3">Завантажуєте свої шаблони</h3>
+        <p>Ваші .doc/.docx з усіма звичними формулюваннями. Клаузула розмічає в них
+           змінні поля — сторони, об'єкт, суму, умови розрахунку.</p>
+      </div>
+      <div class="step">
+        <span class="step-n">КРОК 02</span>
+        <h3 class="h3">Вносите дані сторін</h3>
+        <p>Одна форма замість пошуку по десяти файлах. Формат кадастрового номера,
+           РНОКПП і дат перевіряється одразу — до того, як текст зібрано.</p>
+      </div>
+      <div class="step">
+        <span class="step-n">КРОК 03</span>
+        <h3 class="h3">Отримуєте .docx на вичитку</h3>
+        <p>Готова чернетка у звичному форматі. Місця, де система не була впевнена,
+           підсвічені — щоб ви дивилися саме на них, а не на весь текст.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ МЕЖІ ВІДПОВІДАЛЬНОСТІ ══════════ -->
+<section class="section band" id="limits">
+  <div class="container">
+    <div class="sec-head rv">
+      <span class="eyebrow">Чесно про межі</span>
+      <h2 class="h2">Що Клаузула робить — і чого не робить ніколи</h2>
+      <p class="lead">Нотаріальна дія — це ваша професійна відповідальність. Інструмент,
+        який вдає, що бере її на себе, вам не потрібен.</p>
+    </div>
+    <div class="limits">
+      <div class="limit rv">
+        <h3 class="h3">
+          <svg width="21" height="21" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+            <circle cx="11" cy="11" r="9.2" stroke="var(--ok-600)" stroke-width="1.7"/>
+            <path d="M6.8 11.3l3 3 5.4-5.8" stroke="var(--ok-600)" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Робить
+        </h3>
+        <ul>
+          <li><svg width="17" height="17" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 9.4l3 3 8-8.6" stroke="var(--ok-600)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Збирає чернетку типового договору з вашого шаблону</li>
+          <li><svg width="17" height="17" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 9.4l3 3 8-8.6" stroke="var(--ok-600)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Переносить реквізити сторін без ручного набору</li>
+          <li><svg width="17" height="17" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 9.4l3 3 8-8.6" stroke="var(--ok-600)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Перевіряє формат номерів, дат і сум на очевидні описки</li>
+          <li><svg width="17" height="17" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 9.4l3 3 8-8.6" stroke="var(--ok-600)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Підсвічує місця, які потребують вашого рішення</li>
+        </ul>
+      </div>
+      <div class="limit rv">
+        <h3 class="h3">
+          <svg width="21" height="21" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+            <circle cx="11" cy="11" r="9.2" stroke="var(--ink-400)" stroke-width="1.7"/>
+            <path d="M7.4 7.4l7.2 7.2M14.6 7.4l-7.2 7.2" stroke="var(--ink-400)" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          Не робить
+        </h3>
+        <ul>
+          <li><svg width="17" height="17" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M5.4 5.4l7.2 7.2M12.6 5.4l-7.2 7.2" stroke="var(--ink-400)" stroke-width="2" stroke-linecap="round"/></svg>
+            Не посвідчує і не підписує нічого замість вас</li>
+          <li><svg width="17" height="17" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M5.4 5.4l7.2 7.2M12.6 5.4l-7.2 7.2" stroke="var(--ink-400)" stroke-width="2" stroke-linecap="round"/></svg>
+            Не консультує ваших клієнтів і не спілкується з ними</li>
+          <li><svg width="17" height="17" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M5.4 5.4l7.2 7.2M12.6 5.4l-7.2 7.2" stroke="var(--ink-400)" stroke-width="2" stroke-linecap="round"/></svg>
+            Не замінює перевірку реєстрів і правовстановлюючих документів</li>
+          <li><svg width="17" height="17" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M5.4 5.4l7.2 7.2M12.6 5.4l-7.2 7.2" stroke="var(--ink-400)" stroke-width="2" stroke-linecap="round"/></svg>
+            Не береться за нетипові й спірні правочини</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ ЦІНИ ══════════ -->
+<section class="section" id="pricing">
+  <div class="container">
+    <div class="sec-head rv">
+      <span class="eyebrow">Ціни</span>
+      <h2 class="h2">Підписка на місяць. Без прив'язки на рік</h2>
+      <p class="lead">Учасники пілоту зберігають ціну на 12 місяців після запуску.</p>
+    </div>
+    <div class="plans">
+      <article class="plan rv">
+        <h3 class="h3">Практика</h3>
+        <p class="plan-for">Один нотаріус, один робочий кабінет</p>
+        <div class="price">
+          <span class="price-n"><span class="slot">0&nbsp;000</span></span>
+          <span class="price-per">грн / місяць</span>
+        </div>
+        <p class="plan-note">Ціну підтверджує власник до запуску</p>
+        <ul>
+          <li><svg width="17" height="17" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 9.4l3 3 8-8.6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            До <span class="slot">N</span> договорів на місяць</li>
+          <li><svg width="17" height="17" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 9.4l3 3 8-8.6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Ваші шаблони без обмеження кількості</li>
+          <li><svg width="17" height="17" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 9.4l3 3 8-8.6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Експорт у .docx</li>
+          <li><svg width="17" height="17" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 9.4l3 3 8-8.6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Підтримка електронною поштою</li>
+        </ul>
+        <a href="#request" class="btn btn-ghost btn-block" data-cta="plan-solo" data-plan="practice">Обрати «Практику»</a>
+      </article>
+
+      <article class="plan featured rv">
+        <span class="plan-badge">Для контори</span>
+        <h3 class="h3">Контора</h3>
+        <p class="plan-for">До <span class="slot">N</span> робочих місць, спільні шаблони</p>
+        <div class="price">
+          <span class="price-n"><span class="slot">0&nbsp;000</span></span>
+          <span class="price-per">грн / місяць</span>
+        </div>
+        <p class="plan-note">Ціну підтверджує власник до запуску</p>
+        <ul>
+          <li><svg width="17" height="17" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 9.4l3 3 8-8.6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Усе з «Практики», без ліміту договорів</li>
+          <li><svg width="17" height="17" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 9.4l3 3 8-8.6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Спільна бібліотека шаблонів контори</li>
+          <li><svg width="17" height="17" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 9.4l3 3 8-8.6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Ролі помічників з обмеженим доступом</li>
+          <li><svg width="17" height="17" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 9.4l3 3 8-8.6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Перенесення ваших шаблонів силами команди</li>
+        </ul>
+        <a href="#request" class="btn btn-primary btn-block" data-cta="plan-office" data-plan="office">Обрати «Контору»</a>
+      </article>
+    </div>
+    <p class="pricing-foot">
+      Під час пілоту оплата не списується. Ми показуємо роботу на ваших шаблонах,
+      і тільки після цього ви вирішуєте, чи підключатись.
+    </p>
+  </div>
+</section>
+
+<!-- ══════════ ФОРМА ЗАЯВКИ ══════════ -->
+<section class="section band" id="request">
+  <div class="container form-wrap">
+    <div class="form-side rv">
+      <span class="eyebrow">Заявка на пілот</span>
+      <h2 class="h2">Подивимось на ваших договорах</h2>
+      <p class="lead" style="margin-top:20px">Надішліть заявку — ми зв'яжемось,
+        візьмемо один ваш типовий шаблон і покажемо результат на ньому.</p>
+      <ul>
+        <li>
+          <svg width="21" height="21" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+            <rect x="3.2" y="4.4" width="15.6" height="13.2" rx="2.2" stroke="currentColor" stroke-width="1.7"/>
+            <path d="M3.6 7.6l7.4 5 7.4-5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span><b>Відповідь протягом робочого дня</b>
+            <span>Пишемо на пошту, телефонуємо тільки якщо самі попросите.</span></span>
+        </li>
+        <li>
+          <svg width="21" height="21" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+            <path d="M11 2.8l7 3v5.4c0 4.2-2.9 7.4-7 8.6-4.1-1.2-7-4.4-7-8.6V5.8l7-3z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+            <path d="M7.8 11.2l2.4 2.4 4.2-4.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span><b>Без даних реальних клієнтів</b>
+            <span>Для демонстрації достатньо шаблону з вигаданими реквізитами.</span></span>
+        </li>
+        <li>
+          <svg width="21" height="21" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+            <circle cx="11" cy="11" r="8.4" stroke="currentColor" stroke-width="1.7"/>
+            <path d="M11 6.4V11l3.2 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span><b>Без зобов'язань</b>
+            <span>Заявка не є договором і ні до чого вас не зобов'язує.</span></span>
+        </li>
+      </ul>
+    </div>
+
+    <div class="form-card rv">
+      <form id="lead-form" novalidate>
+        <div class="field">
+          <label for="f-name">Ім'я та прізвище <span class="req">*</span></label>
+          <input type="text" id="f-name" name="name" autocomplete="name" required placeholder="Олена Ковальчук">
+        </div>
+        <div class="row-2">
+          <div class="field">
+            <label for="f-email">Email <span class="req">*</span></label>
+            <input type="email" id="f-email" name="email" autocomplete="email" required placeholder="you@example.com">
+          </div>
+          <div class="field">
+            <label for="f-phone">Телефон</label>
+            <input type="tel" id="f-phone" name="phone" autocomplete="tel" placeholder="+380">
+          </div>
+        </div>
+        <div class="field">
+          <label for="f-role">Ваша практика <span class="req">*</span></label>
+          <select id="f-role" name="role" required>
+            <option value="">Оберіть варіант</option>
+            <option value="private">Приватний нотаріус</option>
+            <option value="state">Державна нотаріальна контора</option>
+            <option value="assistant">Помічник нотаріуса</option>
+            <option value="other">Інше</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="f-volume">Типових договорів на місяць <span class="req">*</span></label>
+          <select id="f-volume" name="volume" required>
+            <option value="">Оберіть варіант</option>
+            <option value="lt10">до 10</option>
+            <option value="10-30">10–30</option>
+            <option value="30-80">30–80</option>
+            <option value="gt80">більше 80</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="f-plan">Який тариф цікавить</label>
+          <select id="f-plan" name="plan">
+            <option value="practice">Практика</option>
+            <option value="office">Контора</option>
+            <option value="undecided">Ще не вирішив</option>
+          </select>
+        </div>
+
+        <label class="consent">
+          <input type="checkbox" id="f-consent" name="consent" required>
+          <span>Погоджуюсь на обробку вказаних контактних даних для звʼязку щодо пілоту
+            та приймаю <a href="#privacy" style="text-decoration:underline">політику конфіденційності</a>.</span>
+        </label>
+
+        <button type="submit" class="btn btn-primary btn-lg btn-block" id="submit-btn">
+          Надіслати заявку
+        </button>
+        <p class="small muted" style="margin-top:14px;text-align:center">
+          Пілот на <span class="slot">N</span> контор. Заявка ні до чого не зобов'язує.
+        </p>
+        <div class="form-err" id="form-err" role="alert"></div>
+      </form>
+
+      <div class="form-ok" id="form-ok" role="status">
+        <svg width="56" height="56" viewBox="0 0 56 56" fill="none" aria-hidden="true" style="margin:0 auto">
+          <circle cx="28" cy="28" r="25" stroke="var(--ok-600)" stroke-width="2.2"/>
+          <path d="M17.5 28.8l7.4 7.4L38.8 21" stroke="var(--ok-600)" stroke-width="3"
+                stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <h3>Заявку прийнято</h3>
+        <p>Напишемо на вказану пошту протягом робочого дня. Якщо зручніше говорити —
+          так і відповідайте в листі, зателефонуємо.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ FAQ ══════════ -->
+<section class="section" id="faq">
+  <div class="container narrow">
+    <div class="sec-head rv" style="max-width:none">
+      <span class="eyebrow">Питання</span>
+      <h2 class="h2">Що зазвичай питають</h2>
+    </div>
+    <div class="faq rv">
+      <details>
+        <summary>Хто відповідає, якщо в договорі буде помилка?</summary>
+        <div class="ans">
+          <p>Нотаріус. Клаузула готує <b>чернетку</b> — це чернетка так само, як
+            підготовлений помічником проєкт документа. Юридичну силу текст отримує
+            тільки після вашої вичитки й посвідчення.</p>
+          <p>Тому в інтерфейсі підсвічуються місця, де система не була впевнена:
+            щоб перевірка була адресною, а не суцільною.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Де зберігаються дані і хто має до них доступ?</summary>
+        <div class="ans">
+          <p><span class="slot">ЗАПОВНИТИ: юрисдикція серверів, строк зберігання,
+            хто має доступ, чи використовуються дані для навчання моделей</span></p>
+          <p>Це твердження юридично значуще для нотаріуса — воно має відповідати
+            реальній інфраструктурі, тому за нас його ніхто не вигадує.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Чи працює це з моїми шаблонами, а не з чужими?</summary>
+        <div class="ans">
+          <p>Так, і це принципово. Ви завантажуєте свої .doc/.docx, Клаузула розмічає
+            в них змінні поля. Формулювання лишаються ваші — змінюється тільки спосіб
+            їх заповнення.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Які договори підтримуються на старті?</summary>
+        <div class="ans">
+          <p>Типові й повторювані: купівля-продаж, дарування, застава, найм.
+            Нетипові та спірні правочини Клаузула не бере — там цінність нотаріуса
+            саме в індивідуальній роботі, а не в швидкості набору.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Чи треба щось встановлювати на комп'ютер?</summary>
+        <div class="ans">
+          <p>Ні. Робота у браузері, результат завантажується як звичайний .docx
+            і далі редагується у Word так само, як зараз.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Що буде, якщо не підійде?</summary>
+        <div class="ans">
+          <p>Підписка помісячна, скасовується будь-коли. Ваші шаблони й підготовлені
+            документи вивантажуються у .docx — нічого не лишається замкненим усередині.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ ФІНАЛЬНИЙ CTA ══════════ -->
+<section class="section final">
+  <div class="container narrow final-in">
+    <h2 class="h2">Один ваш шаблон — і ви побачите результат</h2>
+    <p class="lead">Пілот на <span class="slot">N</span> контор. Без оплати на цьому етапі
+      і без зобов'язань.</p>
+    <a href="#request" class="btn btn-primary btn-lg" data-cta="final">Отримати ранній доступ</a>
+  </div>
+</section>
+
+<!-- ══════════ ФУТЕР ══════════ -->
+<footer id="privacy">
+  <div class="container">
+    <div class="foot-in">
+      <div class="logo">
+        <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true">
+          <rect width="32" height="32" rx="7" fill="var(--brand-900)"/>
+          <path d="M10 9h9l3.5 3.5V23a1 1 0 0 1-1 1H10a1 1 0 0 1-1-1V10a1 1 0 0 1 1-1z"
+                fill="none" stroke="var(--brass-500)" stroke-width="1.6"/>
+          <path d="M12 15.5h8M12 18.5h5.5" stroke="var(--brass-500)" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+        Клаузула
+      </div>
+      <div class="foot-links">
+        <a href="#problem">Навіщо</a>
+        <a href="#how">Як працює</a>
+        <a href="#limits">Межі</a>
+        <a href="#pricing">Ціни</a>
+        <a href="#faq">Питання</a>
+      </div>
+    </div>
+    <p class="foot-legal">
+      <span class="slot">ЗАПОВНИТИ: юрособа / ФОП, ЄДРПОУ, адреса</span>
+      &nbsp;·&nbsp;
+      <span class="slot">ЗАПОВНИТИ: контактний email</span>
+      &nbsp;·&nbsp;
+      <span class="slot">ЗАПОВНИТИ: посилання на політику конфіденційності</span>
+      <br><br>
+      Клаузула — допоміжний інструмент підготовки проєктів документів. Сервіс не надає
+      правових консультацій, не вчиняє нотаріальних дій і не замінює перевірку
+      документів та реєстрів нотаріусом. Усі рішення щодо змісту й посвідчення
+      документа ухвалює нотаріус.
+    </p>
+  </div>
+</footer>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   КОНФІГ — заповнити до заливу трафіку
+   ═══════════════════════════════════════════════════════════ */
+var CFG = {
+  formEndpoint: 'REPLACE_ME',   // URL прийому заявок (Tally / Apps Script / Formspree)
+  hypothesis:   'notary-ai-2026-08'
+};
+
+/* ═══════════ ТРЕКІНГ ═══════════
+   Провайдер-незалежна обгортка. Події лягають у window.dataLayer
+   і дублюються в PostHog/GA, якщо їх підключено.
+   Підключити PostHog ТУТ, до заливу трафіку, і увімкнути записи сесій. */
+(function(){
+  window.dataLayer = window.dataLayer || [];
+  window.track = function(event, props){
+    var payload = Object.assign({event:event, hypothesis:CFG.hypothesis}, utm(), props||{});
+    window.dataLayer.push(payload);
+    if (window.posthog && window.posthog.capture) window.posthog.capture(event, payload);
+    if (window.gtag) window.gtag('event', event, payload);
+  };
+
+  /* ── UTM: читаємо з URL, тримаємо в sessionStorage ── */
+  var UTM_KEYS = ['utm_source','utm_medium','utm_campaign','utm_content','utm_term','gclid','fbclid'];
+  function utm(){
+    var out = {};
+    try {
+      var qs = new URLSearchParams(location.search), stored = {};
+      try { stored = JSON.parse(sessionStorage.getItem('utm') || '{}'); } catch(e){}
+      var fresh = {}, got = false;
+      UTM_KEYS.forEach(function(k){ var v = qs.get(k); if (v){ fresh[k] = v; got = true; } });
+      if (got){ stored = fresh; try { sessionStorage.setItem('utm', JSON.stringify(stored)); } catch(e){} }
+      out = stored || {};
+    } catch(e){}
+    return out;
+  }
+  window.__utm = utm;
+
+  /* ── page_view ── */
+  track('page_view', {path: location.pathname});
+
+  /* ── scroll_50 ── */
+  var fired50 = false;
+  addEventListener('scroll', function(){
+    if (fired50) return;
+    var h = document.documentElement;
+    var pct = (h.scrollTop + innerHeight) / h.scrollHeight;
+    if (pct >= .5){ fired50 = true; track('scroll_50'); }
+  }, {passive:true});
+
+  /* ── cta_click ── */
+  document.querySelectorAll('[data-cta]').forEach(function(el){
+    el.addEventListener('click', function(){
+      track('cta_click', {position: el.dataset.cta, plan: el.dataset.plan || null});
+      if (el.dataset.plan){
+        var sel = document.getElementById('f-plan');
+        if (sel) sel.value = el.dataset.plan;
+      }
+    });
+  });
+
+  /* ── pricing_view ── */
+  if ('IntersectionObserver' in window){
+    var pricing = document.getElementById('pricing');
+    if (pricing){
+      var po = new IntersectionObserver(function(entries){
+        entries.forEach(function(e){
+          if (e.isIntersecting){ track('pricing_view'); po.disconnect(); }
+        });
+      }, {threshold:.35});
+      po.observe(pricing);
+    }
+  }
+})();
+
+/* ═══════════ ФОРМА ═══════════ */
+(function(){
+  var form = document.getElementById('lead-form'),
+      ok   = document.getElementById('form-ok'),
+      err  = document.getElementById('form-err'),
+      btn  = document.getElementById('submit-btn'),
+      started = false;
+
+  if (!form) return;
+
+  form.addEventListener('input', function(){
+    if (!started){ started = true; track('form_start'); }
+  }, {once:false});
+
+  function fail(msg){ err.textContent = msg; err.classList.add('on'); }
+
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    err.classList.remove('on');
+
+    if (!form.checkValidity()){
+      form.reportValidity();
+      var bad = form.querySelector(':invalid');
+      if (bad) bad.focus();
+      return;
+    }
+
+    var data = Object.fromEntries(new FormData(form).entries());
+    Object.assign(data, window.__utm(), {hypothesis: CFG.hypothesis, ts: new Date().toISOString()});
+
+    /* Ендпоінт не налаштований — НЕ вдаємо успіх.
+       Тиха втрата заявок дорожча за видиму помилку. */
+    if (!CFG.formEndpoint || CFG.formEndpoint === 'REPLACE_ME'){
+      fail('Форма ще не підключена до прийому заявок (CFG.formEndpoint). ' +
+           'Не заливайте трафік у цьому стані — заявки нікуди не збережуться.');
+      track('form_error', {reason:'endpoint_not_configured'});
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Надсилаємо…';
+
+    fetch(CFG.formEndpoint, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(data)
+    }).then(function(r){
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      track('lead_submit', {plan: data.plan, role: data.role, volume: data.volume});
+      form.style.display = 'none';
+      ok.classList.add('on');
+      ok.scrollIntoView({block:'center', behavior:'smooth'});
+    }).catch(function(){
+      btn.disabled = false;
+      btn.textContent = 'Надіслати заявку';
+      fail('Не вдалося надіслати заявку. Спробуйте ще раз або напишіть нам на пошту.');
+      track('form_error', {reason:'network'});
+    });
+  });
+})();
+
+/* ═══════════ ПОЯВА ПРИ СКРОЛІ ═══════════
+   Клас .js вмикає початковий стан — без JS контент видимий одразу. */
+(function(){
+  document.documentElement.classList.add('js');
+  var els = document.querySelectorAll('.rv');
+  if (!('IntersectionObserver' in window)){
+    els.forEach(function(el){ el.classList.add('in'); });
+    return;
+  }
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if (e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }
+    });
+  }, {threshold:.12, rootMargin:'0px 0px -8% 0px'});
+  els.forEach(function(el, i){ el.style.transitionDelay = (i % 3) * 70 + 'ms'; io.observe(el); });
+})();
+</script>
+</body>
+</html>

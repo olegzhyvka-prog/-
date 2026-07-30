@@ -1,0 +1,67 @@
+/* ============================================================
+   Клаузула — дизайн-токени
+   Brand DNA: точність, спокій, документ. Не «AI-стартап», а інструмент
+   регульованої професії. Світла тема (паперовий білий), чорнильний
+   темно-синій текст, латунний акцент — колір печатки і фольги на бланку.
+   Серифний заголовок = авторитет, гротеск у тілі = робочий інструмент.
+   ============================================================ */
+:root{
+  /* ── папір / чорнило ── */
+  --paper:        oklch(98.8% .004 85);   /* тепло-білий фон */
+  --paper-2:      oklch(96.6% .006 85);   /* секція-підкладка */
+  --paper-3:      oklch(94.2% .008 85);   /* картка */
+  --ink-900:      oklch(21% .035 258);    /* основний текст, майже чорно-синій */
+  --ink-700:      oklch(34% .04 258);
+  --ink-500:      oklch(50% .028 258);    /* другорядний текст */
+  --ink-400:      oklch(61% .022 258);    /* підписи */
+
+  /* ── бренд: чорнильний синій ── */
+  --brand-900:    oklch(26% .07 258);
+  --brand-700:    oklch(38% .095 258);
+  --brand-600:    oklch(45% .105 258);
+  --brand-500:    oklch(54% .11 258);
+  --brand-100:    oklch(93% .025 258);
+
+  /* ── акцент: латунь / печатка ── */
+  --brass-600:    oklch(58% .105 75);
+  --brass-500:    oklch(70% .125 75);
+  --brass-300:    oklch(86% .075 78);
+  --brass-100:    oklch(95% .035 80);
+
+  /* ── семантика ── */
+  --ok-600:       oklch(52% .11 155);
+  --warn-500:     oklch(72% .15 65);
+
+  /* ── поверхні ── */
+  --bg:           var(--paper);
+  --surface:      oklch(100% 0 0);
+  --fg:           var(--ink-900);
+  --muted:        var(--ink-500);
+  --line:         color-mix(in oklab, var(--ink-900) 12%, transparent);
+  --line-soft:    color-mix(in oklab, var(--ink-900) 7%, transparent);
+
+  /* ── типографіка ── */
+  --font-display: ui-serif, Georgia, "Times New Roman", "Liberation Serif", serif;
+  --font:         ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --mono:         ui-monospace, "SF Mono", "JetBrains Mono", "DejaVu Sans Mono", monospace;
+
+  /* ── ритм ── */
+  --container:    1120px;
+  --container-nr: 720px;                        /* вузька колонка для тексту */
+  --section-y:    clamp(96px, 11vw, 160px);
+
+  /* ── форма ── */
+  --r-sm:  8px;
+  --r-md:  12px;
+  --r-lg:  18px;
+  --r-xl:  26px;
+  --pill:  999px;
+
+  /* ── рух ── */
+  --e-out: cubic-bezier(.16, 1, .3, 1);
+
+  /* ── тіні: м'які, паперові, без «неонового» глоу ── */
+  --shadow-sm: 0 1px 2px rgb(20 28 45 / .06), 0 2px 6px -2px rgb(20 28 45 / .08);
+  --shadow-md: 0 2px 4px -2px rgb(20 28 45 / .08), 0 12px 28px -10px rgb(20 28 45 / .14);
+  --shadow-lg: 0 2px 6px -2px rgb(20 28 45 / .09), 0 30px 60px -22px rgb(20 28 45 / .20);
+}

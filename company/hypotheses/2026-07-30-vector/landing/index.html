@@ -108,15 +108,6 @@ h1 em{font-style:normal;background:linear-gradient(100deg,var(--brand-300),var(-
 .term-body .y{color:oklch(84% .15 85)}
 .term-body .b{color:var(--brand-300)}
 
-/* ── логотипи ── */
-.strip{border-block:1px solid var(--line);padding-block:26px;overflow:hidden;
-  -webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);
-          mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
-.strip-row{display:flex;gap:56px;width:max-content;animation:slide 34s linear infinite;
-  align-items:center;color:var(--ink-500);font-size:14px;font-weight:600;letter-spacing:.02em}
-.strip:hover .strip-row{animation-play-state:paused}
-@keyframes slide{to{transform:translateX(-50%)}}
-
 /* ── секції ── */
 .eyebrow{font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--brand-300);
   font-weight:600;margin-bottom:16px}
@@ -228,10 +219,10 @@ footer{border-top:1px solid var(--line);padding-block:34px;color:var(--ink-500);
 
 <header class="hero">
   <div class="container">
-    <div class="badge"><span class="dot"></span>Середній цикл перевірки — <b>6.4 дня</b></div>
+    <div class="badge"><span class="dot"></span>Від брифу до вироку — <b>7 днів</b></div>
     <h1>Перевір ідею за тиждень, а не за <em>три місяці</em></h1>
     <p class="lede">Досьє з числами, лендінг, трафік і чесний вирок. Гіпотези, які
-      не працюють, помирають на третій день — поки вони ще дешеві.</p>
+      не працюють, помирають на першому тижні — поки вони ще дешеві.</p>
     <div class="hero-cta">
       <a class="btn btn-primary btn-lg" href="#pricing">Перевірити гіпотезу — $290</a>
       <a class="btn btn-ghost btn-lg" href="#how">Як це працює</a>
@@ -241,12 +232,12 @@ footer{border-top:1px solid var(--line);padding-block:34px;color:var(--ink-500);
     <div class="term">
       <div class="term-bar">
         <span class="tdot"></span><span class="tdot"></span><span class="tdot"></span>
-        <span class="term-title">dossier — hypothesis #14</span>
+        <span class="term-title">dossier.example — приклад формату</span>
       </div>
       <div class="term-body">
 <span class="c">$ vector check "AI-асистент для стоматологій, $19/міс"</span>
 
-  Попит        <span class="g">✓</span>  2 400 пошуків/міс · CPC $3.10   <span class="c">Semrush, 2026-07</span>
+  Попит        <span class="g">✓</span>  2 400 пошуків/міс · CPC $3.10   <span class="c">джерело · дата</span>
   Конкуренти   <span class="y">!</span>  3 гравці, лідер $49/міс         <span class="c">місце в нижньому сегменті</span>
   LTV          <span class="c">→</span>  $114     <span class="c">(маржа 75%, утримання 8 міс)</span>
   Стеля CAC    <span class="c">→</span>  $38
@@ -261,16 +252,10 @@ footer{border-top:1px solid var(--line);padding-block:34px;color:var(--ink-500);
 <span class="c">$ </span><span style="opacity:.5">▊</span>
       </div>
     </div>
+    <p class="hero-note">Приклад формату звіту. Цифри умовні — у справжньому досьє
+      кожна з джерелом і датою.</p>
   </div>
 </header>
-
-<div class="strip">
-  <div class="strip-row" aria-hidden="true">
-    <span>SEMRUSH</span><span>POSTHOG</span><span>STRIPE</span><span>META ADS</span><span>GOOGLE ADS</span>
-    <span>VERCEL</span><span>FIGMA</span><span>SEMRUSH</span><span>POSTHOG</span><span>STRIPE</span>
-    <span>META ADS</span><span>GOOGLE ADS</span><span>VERCEL</span><span>FIGMA</span>
-  </div>
-</div>
 
 <section class="section" id="how">
   <div class="container">
@@ -288,7 +273,7 @@ footer{border-top:1px solid var(--line);padding-block:34px;color:var(--ink-500);
         <div class="step-t">День 2 · 1 день</div></div>
       <div class="step reveal"><div class="step-n">03</div><h3>Ринок</h3>
         <p>Живий трафік на чотири різні кути. Перші 48 годин не чіпаємо — алгоритм вчиться.</p>
-        <div class="step-t">Дні 3-6 · $300</div></div>
+        <div class="step-t">Дні 3-6 · ваш бюджет</div></div>
       <div class="step reveal"><div class="step-n">04</div><h3>Вирок</h3>
         <p>Діагноз воронки, значущість, перерахунок економіки за фактом. Kill, iterate, pivot або scale.</p>
         <div class="step-t">День 7 · 2 години</div></div>
@@ -300,13 +285,12 @@ footer{border-top:1px solid var(--line);padding-block:34px;color:var(--ink-500);
   <div class="container">
     <div class="reveal">
       <div class="eyebrow">Чому це дешевше</div>
-      <h2>Гіпотеза, яку вбили на третій день, коштує $300</h2>
+      <h2>Дешевше помилитись на тиждень, ніж на квартал</h2>
     </div>
     <div class="stats">
-      <div class="stat reveal"><b data-to="6">0</b><span>днів у середньому до вироку</span></div>
-      <div class="stat reveal"><b data-to="290">0</b><span>доларів фіксованої ціни</span></div>
-      <div class="stat reveal"><b data-to="61">0</b><span>відсотків гіпотез гинуть до лендінга</span></div>
-      <div class="stat reveal"><b data-to="4">0</b><span>кути креативу в кожному тесті</span></div>
+      <div class="stat reveal"><b data-to="7">7</b><span>днів від брифу до вироку — строк фіксований</span></div>
+      <div class="stat reveal"><b data-to="290">290</b><span>доларів фіксованої ціни повного тесту</span></div>
+      <div class="stat reveal"><b data-to="4">4</b><span>кути креативу в кожному тесті</span></div>
     </div>
   </div>
 </section>
@@ -331,7 +315,7 @@ footer{border-top:1px solid var(--line);padding-block:34px;color:var(--ink-500);
         <a class="btn btn-ghost" href="#">Замовити досьє</a>
       </div>
       <div class="plan featured reveal">
-        <span class="plan-tag">Найчастіший вибір</span>
+        <span class="plan-tag">Повний цикл</span>
         <h3>Повний тест</h3>
         <div class="price">$290<small> + бюджет</small></div>
         <ul>
@@ -366,15 +350,17 @@ footer{border-top:1px solid var(--line);padding-block:34px;color:var(--ink-500);
     </div>
     <div class="faq">
       <details open><summary>Що як гіпотеза не спрацює?</summary>
-        <p>Це нормальний і найчастіший результат — приблизно три з п'яти гіпотез гинуть.
+        <p>Це нормальний результат — саме заради нього тест і робиться.
         Ви отримуєте діагноз: на якому саме кроці воронки все зупинилось і що це означає
-        для наступних ідей. Мертва гіпотеза за $300 дешевша за живу за $8000.</p></details>
+        для наступних ідей. Гіпотеза, яку закрили за тиждень, дешевша за ту,
+        яку будували три місяці.</p></details>
       <details><summary>Чому фіксована ціна, а не години?</summary>
         <p>Погодинна ставка створює стимул працювати довше. Фіксована — стимул давати
         вирок швидше. Наші інтереси мають збігатися з вашими.</p></details>
       <details><summary>Чий рекламний бюджет?</summary>
-        <p>Ваш, і йде напряму з вашого кабінету — ми його не торкаємось. Типово $250-400
-        на одну гіпотезу. Ліміт виставляється до старту.</p></details>
+        <p>Ваш, і йде напряму з вашого кабінету — ми його не торкаємось. Розмір рахуємо
+        до старту: від CPC у вашій ніші та вибірки, потрібної для висновку.
+        Ліміт виставляється до першого показу.</p></details>
       <details><summary>Ви робите сам продукт?</summary>
         <p>Ні. Ми доводимо що його варто робити. Це різні задачі і змішувати їх —
         конфлікт інтересів: той хто будує, завжди знайде причину будувати.</p></details>

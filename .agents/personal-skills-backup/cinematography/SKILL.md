@@ -25,7 +25,7 @@ description: |
 | Над плечем | Over-the-Shoulder (OTS) | З-за плеча | Діалог, точка зору |
 | Точка зору | POV Shot | Очима персонажа | Залучення глядача |
 
-**Для Symplexy (найчастіше використовуй):**
+**Для продукт (найчастіше використовуй):**
 - `medium shot` — людина за ноутбуком, розмова
 - `close-up` — руки на клавіатурі, екран з AI інтерфейсом
 - `extreme wide shot` — офіс, простір, масштаб
@@ -64,7 +64,7 @@ drone shot               — повітряна зйомка
 whip pan                 — різкий панорамний рух (перехід між сценами)
 ```
 
-### Комбінації для Symplexy контенту
+### Комбінації для продукту з company/products.md контенту
 ```
 — Інтро до огляду інструменту:
 "slow push in on laptop screen showing AI interface, cinematic"
@@ -115,7 +115,7 @@ neutral lighting         — природний баланс (документа
 mixed lighting           — тепле+холодне (сучасний кінематограф)
 ```
 
-### Кращі комбінації для Symplexy
+### Кращі комбінації для продукту з company/products.md
 ```
 — Технологічний AI контент:
 "cool blue ambient lighting, screen glow reflecting on face, dark background"

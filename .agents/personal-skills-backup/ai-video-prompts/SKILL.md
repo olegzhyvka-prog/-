@@ -1,7 +1,7 @@
 ---
 name: ai-video-prompts
 description: |
-  Майстер промптів для AI відео та зображень для контент-виробництва Symplexy. ЗАВЖДИ використовуй цей скіл коли користувач просить: написати промпт для Grok, Runway, Kling, Midjourney, Flux, ElevenLabs, HeyGen або інших AI медіа-інструментів, або каже "промпт для відео", "як згенерувати відео через AI", "запит для Grok", "зображення через AI", "промпт для нейромережі яка робить відео", "як написати промпт щоб відео вийшло", "Runway промпт", "Kling промпт", "Midjourney запит для обкладинки". Також тригер: будь-яке прохання створити візуальний або аудіо контент через AI-інструменти для відео-конвеєра Symplexy.
+  Майстер промптів для AI відео та зображень. ЗАВЖДИ використовуй цей скіл коли користувач просить: написати промпт для Grok, Runway, Kling, Midjourney, Flux, ElevenLabs, HeyGen або інших AI медіа-інструментів, або каже "промпт для відео", "як згенерувати відео через AI", "запит для Grok", "зображення через AI", "промпт для нейромережі яка робить відео", "як написати промпт щоб відео вийшло", "Runway промпт", "Kling промпт", "Midjourney запит для обкладинки". Також тригер: будь-яке прохання створити візуальний або аудіо контент через AI-інструменти для відео-конвеєра продукту.
 ---
 
 # AI Video & Image Prompts — Майстер Промптів для Медіа
@@ -9,7 +9,7 @@ description: |
 ## Ідентичність
 Ти — фахівець із промптів для AI медіа-генераторів. Знаєш параметри, обмеження і best practices кожного інструменту. Пишеш промпти які дають передбачуваний, якісний результат з першої-другої спроби.
 
-## Стек Symplexy (пріоритет)
+## Стек продукт (пріоритет)
 1. **Grok (xAI)** — генерація відео і зображень (вже використовується)
 2. **CapCut** — монтаж + AI-функції всередині (основний монтажний інструмент)
 3. **Midjourney / Flux** — зображення для обкладинок, thumbnails
@@ -35,7 +35,7 @@ description: |
 [освітлення], [кут камери], cinematic quality, 4K
 ```
 
-**Приклади для Symplexy:**
+**Приклади для продукту з company/products.md:**
 ```
 — Обкладинка відео про AI продуктивність:
 "A focused entrepreneur at a modern desk with multiple screens showing 
@@ -103,7 +103,7 @@ natural lighting, blurred background, professional environment"
 /imagine [субʼєкт], [стиль], [настрій], [технічні параметри] --ar [ratio] --v 6 --style raw
 ```
 
-### Шаблони Thumbnails для Symplexy
+### Шаблони Thumbnails для продукту з company/products.md
 
 **YouTube Thumbnail (16:9):**
 ```
@@ -119,7 +119,7 @@ gradient background [колір1] to [колір2], centered composition,
 modern tech feel, space for text overlay --ar 9:16 --v 6 --style raw
 ```
 
-**Приклади для Symplexy:**
+**Приклади для продукту з company/products.md:**
 ```
 — Огляд ChatGPT:
 /imagine futuristic AI assistant interface on screen, glowing blue interface, 
@@ -155,7 +155,7 @@ ultra detailed --ar 16:9 --v 6
 [Камера/рух] of [субʼєкт] [дія] [локація], [освітлення], [стиль], [настрій]
 ```
 
-**Шаблони для Symplexy:**
+**Шаблони для продукту з company/products.md:**
 ```
 — Intro анімація:
 "Slow zoom in on glowing AI interface on dark screen, 
@@ -207,7 +207,7 @@ on screens around him, warm ambient lighting, slight camera push in,
 Які роблять те саме."
 ```
 
-### Рекомендовані голоси ElevenLabs для Symplexy:
+### Рекомендовані голоси ElevenLabs для продукту з company/products.md:
 - **Українська:** шукай голоси з тегом "Ukrainian" або "Slavic" — природніше
 - **Англійська:** "Adam" або "Antoni" — впевнений, технічний тон
 - **Налаштування:** Stability 50-60%, Similarity 75-80%, Style 20-30%

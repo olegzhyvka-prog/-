@@ -34,7 +34,7 @@ description: >
 | One-time | Разова оплата назавжди | Простий інструмент | Sketch, Cleanmymac |
 | Marketplace | % від транзакцій | Є покупці і продавці | Airbnb, Etsy |
 | White-label | Продаєш платформу як чужий бренд | B2B, агентства | BookingGPT потенційно |
-| Affiliate | Комісія за реферал | Великий трафік | Symplexy каталог |
+| Affiliate | Комісія за реферал | Великий трафік | продукт каталог |
 | Services + Product | Сервіс фінансує продукт | Ранній стейдж | Мікро-агентство |
 
 ### Для контентних бізнесів і медіа
@@ -176,9 +176,9 @@ Trial замість Freemium:
 
 ---
 
-## ЧАСТИНА 6 - Revenue Streams для Symplexy і BookingGPT
+## ЧАСТИНА 6 - Revenue Streams для продукту з company/products.md і BookingGPT
 
-### Symplexy (AI каталог)
+### продукт (AI каталог)
 ```
 Короткостроково:
 - Affiliate комісії від інструментів (5-30%)

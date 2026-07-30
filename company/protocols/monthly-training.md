@@ -34,13 +34,13 @@
 Запускаю `chief-of-staff` із завданням «місячний цикл перенавчання». Вона визначає,
 кого перенавчаємо цього місяця.
 
-**Не всіх одночасно.** 20 працівників × повне дослідження = дорого і неефективно.
+**Не всіх одночасно.** 21 працівник × повне дослідження = дорого і неефективно.
 Ротація по хвилях:
 
 | Хвиля | Працівники | Ритм |
 |---|---|---|
 | A — швидкозмінні | `ai-engineer`, `seo-aeo-lead`, `paid-ads-buyer`, `legal-compliance`, `sales-closer` | **щомісяця** |
-| B — середні | `growth-lead`, `content-strategist`, `conversion-copywriter`, `data-analyst`, `customer-success`, `security-engineer` | раз на 2 місяці |
+| B — середні | `growth-lead`, `content-strategist`, `conversion-copywriter`, `data-analyst`, `customer-success`, `security-engineer`, `red-team-critic` | раз на 2 місяці |
 | C — повільні | `principal-architect`, `fullstack-engineer`, `devops-sre`, `qa-lead`, `brand-designer`, `product-strategist`, `market-researcher`, `finance-controller`, `chief-of-staff` | раз на 3 місяці |
 
 Позачергово перенавчаємо будь-кого, якщо в його зоні сталась велика зміна.

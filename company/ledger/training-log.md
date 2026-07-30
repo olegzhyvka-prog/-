@@ -32,7 +32,7 @@
 | Хвиля | Ритм | Працівники |
 |---|---|---|
 | A | щомісяця | `ai-engineer`, `seo-aeo-lead`, `paid-ads-buyer`, `legal-compliance`, `sales-closer` |
-| B | раз на 2 міс | `growth-lead`, `content-strategist`, `conversion-copywriter`, `data-analyst`, `customer-success`, `security-engineer` |
+| B | раз на 2 міс | `growth-lead`, `content-strategist`, `conversion-copywriter`, `data-analyst`, `customer-success`, `security-engineer`, `red-team-critic` |
 | C | раз на 3 міс | `principal-architect`, `fullstack-engineer`, `devops-sre`, `qa-lead`, `brand-designer`, `product-strategist`, `market-researcher`, `finance-controller`, `chief-of-staff` |
 
 ---

@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 .agents/skills/unit-economics-calc/scripts/*)",
+      "Bash(python3 .agents/skills/video-assembly/scripts/*)",
+      "Bash(bash .agents/skills/video-assembly/scripts/batch_variants.sh:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git branch:*)",
+      "Bash(git show:*)",
+      "Bash(ls:*)",
+      "Bash(find:*)",
+      "Bash(wc:*)",
+      "Bash(file:*)",
+      "Bash(mkdir:*)",
+      "Bash(python3 -c:*)",
+      "Read(//home/user/-/**)",
+      "Read(//root/.claude/skills/**)"
+    ],
+    "deny": [
+      "Bash(rm -rf /*)",
+      "Read(//home/user/-/**/.env)",
+      "Read(//home/user/-/**/*secret*)"
+    ]
+  }
+}

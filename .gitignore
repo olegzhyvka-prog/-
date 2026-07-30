@@ -1,0 +1,6 @@
+# Скріншоти на всю сторінку важать 1-2 МБ. Тримаємо тільки обрізані прев'ю героя.
+company/hypotheses/*/landing/screenshot-*-1440.png
+company/hypotheses/*/landing/screenshot-*-390.png
+node_modules/
+__pycache__/
+*.pyc

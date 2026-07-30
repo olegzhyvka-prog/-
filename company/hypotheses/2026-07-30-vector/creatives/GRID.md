@@ -119,6 +119,27 @@ Meta ріже неспроможні claims, а забанений акаунт 
 | `vector_verdict_calendar_9x16_v1.mp4` | calendar | сцена не зроблена |
 | `vector_verdict_refusal_9x16_v1.mp4` | refusal | сцена не зроблена |
 
+Сцена зрендереного хука: `scenes/vector_verdict_question_9x16.html`
+(самодостатній HTML, шрифт вбудований у base64 — рендер повторюваний офлайн).
+Перерендерити:
+```bash
+python3 .agents/skills/video-assembly/scripts/render_motion.py \
+  company/hypotheses/2026-07-30-vector/creatives/scenes/vector_verdict_question_9x16.html \
+  company/hypotheses/2026-07-30-vector/creatives/vector_verdict_question_9x16_v1.mp4 \
+  --duration 4 --fps 30 --size 1080x1920
+```
+
+**У файлі `vector_verdict_question_9x16_v1.mp4` немає аудіодоріжки.** Це навмисно:
+хук самодостатній без звуку. Текст під озвучку вже вшитий у кадр як субтитри —
+
+| Тайминг | Репліка |
+|---|---|
+| 0.1–2.0 с | Скільки місяців ти носишся з цією ідеєю? |
+| 2.1–4.0 с | Сім днів — і буде відповідь. Kill або scale. |
+
+Озвучку (ElevenLabs) і музику з чистими правами приносить користувач;
+зведення, дакінг і нормалізація −14 LUFS робляться на етапі `assemble.py`.
+
 Спільні блоки (ще не зроблені): `vector_body_9x16_v1.mp4`, `vector_cta_9x16_v1.mp4`.
 Збірка чотирьох роликів: `bash scripts/batch_variants.sh hooks/ body.mp4 cta.mp4 out/`.
 

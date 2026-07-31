@@ -97,6 +97,12 @@
       "skillPath": "skills/email-sequence/SKILL.md",
       "computedHash": "49c9d1795813eec119a1fd9344e763fc911c05616411a68117b30d77204fa399"
     },
+    "find-skills": {
+      "source": "vercel-labs/skills",
+      "sourceType": "github",
+      "skillPath": "skills/find-skills/SKILL.md",
+      "computedHash": "913b9d37d0d54047dd65222bb8c67b2bf04e3cb87dcad1729068d7a8b2c8c396"
+    },
     "form-cro": {
       "source": "coreyhaines31/marketingskills",
       "sourceType": "github",

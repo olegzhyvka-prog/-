@@ -1,0 +1,710 @@
+<title>Verdict Page — Format Template</title>
+
+<style>
+  :root {
+    --ground:        #ECEEEF;
+    --surface:       #FFFFFF;
+    --surface-sunk:  #E2E6E7;
+    --line:          #C9D0D2;
+    --line-soft:     #DCE1E2;
+    --ink:           #12181A;
+    --ink-mid:       #4A585C;
+    --ink-quiet:     #6E7C80;
+    --amber:         #B87413;
+    --amber-bg:      #F6E3C4;
+    --cyan:          #1F7C8C;
+    --good:          #2E7248;
+    --bad:           #9C3A2E;
+
+    --mono: ui-monospace, "SF Mono", SFMono-Regular, "JetBrains Mono", Menlo, Consolas, monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+
+    --measure: 68ch;
+    --pad: clamp(1.25rem, 4vw, 3rem);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ground:       #14191B;
+      --surface:      #1B2225;
+      --surface-sunk: #101618;
+      --line:         #2E393D;
+      --line-soft:    #242E31;
+      --ink:          #E6EBEC;
+      --ink-mid:      #A3B1B5;
+      --ink-quiet:    #7C8B8F;
+      --amber:        #E9A13B;
+      --amber-bg:     #352915;
+      --cyan:         #4FA8B8;
+      --good:         #5BB07C;
+      --bad:          #D9705F;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground:       #14191B;
+    --surface:      #1B2225;
+    --surface-sunk: #101618;
+    --line:         #2E393D;
+    --line-soft:    #242E31;
+    --ink:          #E6EBEC;
+    --ink-mid:      #A3B1B5;
+    --ink-quiet:    #7C8B8F;
+    --amber:        #E9A13B;
+    --amber-bg:     #352915;
+    --cyan:         #4FA8B8;
+    --good:         #5BB07C;
+    --bad:          #D9705F;
+  }
+
+  :root[data-theme="light"] {
+    --ground:       #ECEEEF;
+    --surface:      #FFFFFF;
+    --surface-sunk: #E2E6E7;
+    --line:         #C9D0D2;
+    --line-soft:    #DCE1E2;
+    --ink:          #12181A;
+    --ink-mid:      #4A585C;
+    --ink-quiet:    #6E7C80;
+    --amber:        #B87413;
+    --amber-bg:     #F6E3C4;
+    --cyan:         #1F7C8C;
+    --good:         #2E7248;
+    --bad:          #9C3A2E;
+  }
+
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: var(--pad);
+    display: flex;
+    flex-direction: column;
+    gap: clamp(2.5rem, 6vw, 4.5rem);
+  }
+
+  /* ---------- placeholder treatment ---------- */
+
+  .ph {
+    color: var(--ink-quiet);
+    border-bottom: 1px dashed currentColor;
+    font-style: normal;
+  }
+
+  .notice {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: .5rem 1rem;
+    padding: .85rem 1.1rem;
+    background: var(--amber-bg);
+    border: 1px solid var(--amber);
+    color: var(--ink);
+    font-family: var(--mono);
+    font-size: .78rem;
+    line-height: 1.5;
+  }
+
+  .notice strong {
+    color: var(--amber);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  /* ---------- masthead ---------- */
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: .72rem;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--cyan);
+  }
+
+  h1 {
+    font-family: var(--mono);
+    font-size: clamp(1.9rem, 5.5vw, 3rem);
+    line-height: 1.1;
+    letter-spacing: -.02em;
+    font-weight: 600;
+    text-wrap: balance;
+    max-width: 20ch;
+    margin-block: .6rem .9rem;
+  }
+
+  .standfirst {
+    max-width: var(--measure);
+    color: var(--ink-mid);
+    font-size: 1.05rem;
+  }
+
+  .meta-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .4rem 1.6rem;
+    margin-top: 1.4rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--line);
+    font-family: var(--mono);
+    font-size: .76rem;
+    color: var(--ink-quiet);
+  }
+
+  .meta-strip b {
+    color: var(--ink-mid);
+    font-weight: 500;
+  }
+
+  /* ---------- section scaffolding ---------- */
+
+  .sec {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .sec-head {
+    display: flex;
+    align-items: baseline;
+    gap: .9rem;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: .6rem;
+  }
+
+  .sec-head h2 {
+    font-family: var(--mono);
+    font-size: .82rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .sec-head span {
+    font-family: var(--mono);
+    font-size: .74rem;
+    color: var(--ink-quiet);
+    margin-left: auto;
+    text-align: right;
+  }
+
+  /* ---------- the verdict ---------- */
+
+  .verdict {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--amber);
+    padding: clamp(1.4rem, 4vw, 2.4rem);
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+  }
+
+  .verdict-tag {
+    font-family: var(--mono);
+    font-size: .72rem;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--amber);
+    font-weight: 600;
+  }
+
+  .verdict-pick {
+    font-family: var(--mono);
+    font-size: clamp(1.5rem, 4.5vw, 2.2rem);
+    line-height: 1.15;
+    font-weight: 600;
+    letter-spacing: -.01em;
+  }
+
+  .verdict-why {
+    max-width: var(--measure);
+    color: var(--ink-mid);
+  }
+
+  .verdict-nums {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.75rem 2.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--line-soft);
+  }
+
+  .stat {
+    display: flex;
+    flex-direction: column;
+    gap: .15rem;
+  }
+
+  .stat .k {
+    font-family: var(--mono);
+    font-size: .7rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--ink-quiet);
+  }
+
+  .stat .v {
+    font-family: var(--mono);
+    font-size: 1.45rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+  }
+
+  .runners {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+  }
+
+  .runner {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    padding: 1.1rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: .4rem;
+  }
+
+  .runner .role {
+    font-family: var(--mono);
+    font-size: .7rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--ink-quiet);
+  }
+
+  .runner .name {
+    font-family: var(--mono);
+    font-size: 1.05rem;
+    font-weight: 600;
+  }
+
+  .runner p {
+    font-size: .9rem;
+    color: var(--ink-mid);
+  }
+
+  .runner.is-skip {
+    border-left: 3px solid var(--bad);
+  }
+
+  .runner.is-second {
+    border-left: 3px solid var(--cyan);
+  }
+
+  /* ---------- evidence grid ---------- */
+
+  .prompt-box {
+    background: var(--surface-sunk);
+    border: 1px solid var(--line-soft);
+    padding: 1rem 1.15rem;
+    font-family: var(--mono);
+    font-size: .85rem;
+    line-height: 1.65;
+    color: var(--ink-mid);
+    overflow-x: auto;
+  }
+
+  .prompt-box b {
+    display: block;
+    font-size: .7rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    margin-bottom: .45rem;
+    font-weight: 600;
+  }
+
+  .evidence {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+  }
+
+  .clip {
+    display: flex;
+    flex-direction: column;
+    gap: .55rem;
+  }
+
+  .frame {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    background:
+      repeating-linear-gradient(
+        135deg,
+        transparent 0 11px,
+        var(--line-soft) 11px 12px
+      ),
+      var(--surface-sunk);
+    border: 1px solid var(--line);
+    display: grid;
+    place-items: center;
+  }
+
+  .frame::after {
+    content: "";
+    width: 0;
+    height: 0;
+    border-left: 15px solid var(--ink-quiet);
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    opacity: .55;
+  }
+
+  .frame.is-winner {
+    border: 2px solid var(--amber);
+  }
+
+  .clip-label {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: .5rem;
+    font-family: var(--mono);
+    font-size: .8rem;
+  }
+
+  .clip-label .tool { font-weight: 600; }
+
+  .clip-note {
+    font-size: .82rem;
+    color: var(--ink-mid);
+    line-height: 1.5;
+  }
+
+  .badge {
+    font-family: var(--mono);
+    font-size: .64rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    padding: .12rem .45rem;
+    border: 1px solid currentColor;
+    white-space: nowrap;
+  }
+
+  .badge.win  { color: var(--amber); }
+  .badge.fail { color: var(--bad); }
+
+  /* ---------- data table ---------- */
+
+  .table-scroll { overflow-x: auto; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--mono);
+    font-size: .85rem;
+    min-width: 620px;
+  }
+
+  th, td {
+    text-align: right;
+    padding: .7rem .8rem;
+    border-bottom: 1px solid var(--line-soft);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  th:first-child, td:first-child {
+    text-align: left;
+    white-space: normal;
+  }
+
+  thead th {
+    font-size: .68rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--ink-quiet);
+    font-weight: 500;
+    border-bottom: 1px solid var(--line);
+  }
+
+  tbody tr.is-winner {
+    background: var(--amber-bg);
+  }
+
+  tbody tr.is-winner td:first-child {
+    font-weight: 600;
+    box-shadow: inset 3px 0 0 var(--amber);
+  }
+
+  /* ---------- method ---------- */
+
+  .method {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    padding: clamp(1.2rem, 3.5vw, 2rem);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .method h3 {
+    font-family: var(--mono);
+    font-size: .72rem;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    margin-bottom: .4rem;
+    font-weight: 600;
+  }
+
+  .method p {
+    font-size: .9rem;
+    color: var(--ink-mid);
+  }
+
+  footer {
+    border-top: 1px solid var(--line);
+    padding-top: 1.4rem;
+    font-family: var(--mono);
+    font-size: .76rem;
+    color: var(--ink-quiet);
+    line-height: 1.7;
+  }
+
+  a { color: var(--cyan); }
+
+  a:focus-visible,
+  [tabindex]:focus-visible {
+    outline: 2px solid var(--amber);
+    outline-offset: 3px;
+  }
+</style>
+
+<div class="wrap">
+
+  <div class="notice">
+    <strong>Format template</strong>
+    <span>No tests have been run yet. Every judgement and number below is a
+    <span class="ph">dashed placeholder</span> — replace each one with a measured result
+    before this page is published anywhere.</span>
+  </div>
+
+  <header>
+    <p class="eyebrow">Head-to-head test · AI video for product ads</p>
+    <h1>Which AI video tool actually holds a product on screen?</h1>
+    <p class="standfirst">
+      Four tools. One prompt. One product. Same seed, same aspect ratio, same day.
+      We rendered until each tool produced a clip we would actually put behind ad
+      spend — then counted what that took.
+    </p>
+    <div class="meta-strip">
+      <span><b>Tested</b> <span class="ph">date</span></span>
+      <span><b>Renders</b> <span class="ph">n</span> per tool</span>
+      <span><b>Spend</b> <span class="ph">$n</span> total</span>
+      <span><b>Independent</b> — no tool was given advance notice</span>
+    </div>
+  </header>
+
+  <section class="sec">
+    <div class="sec-head">
+      <h2>The verdict</h2>
+      <span>read this, skip the rest</span>
+    </div>
+
+    <div class="verdict">
+      <p class="verdict-tag">◆ Use this one</p>
+      <p class="verdict-pick"><span class="ph">Winning tool</span></p>
+      <p class="verdict-why">
+        One sentence naming the single reason it won — stated as a thing that happened
+        in the test, not a feature claim. Example shape: <em>it was the only tool that
+        kept the label readable through a full 360° turn, and it got there in
+        <span class="ph">n</span> renders instead of <span class="ph">n</span>.</em>
+      </p>
+      <div class="verdict-nums">
+        <div class="stat">
+          <span class="k">Cost / usable clip</span>
+          <span class="v ph">$0.00</span>
+        </div>
+        <div class="stat">
+          <span class="k">Renders to usable</span>
+          <span class="v ph">0.0</span>
+        </div>
+        <div class="stat">
+          <span class="k">Time / clip</span>
+          <span class="v ph">0m 00s</span>
+        </div>
+        <div class="stat">
+          <span class="k">Usable rate</span>
+          <span class="v ph">00%</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="runners">
+      <div class="runner is-second">
+        <span class="role">Second choice</span>
+        <span class="name ph">Tool name</span>
+        <p>When you would pick this instead — one specific condition, not a hedge.</p>
+      </div>
+      <div class="runner is-skip">
+        <span class="role">Skip</span>
+        <span class="name ph">Tool name</span>
+        <p>The concrete failure that disqualified it. Name it plainly.</p>
+      </div>
+      <div class="runner">
+        <span class="role">Not tested here</span>
+        <span class="name ph">Tool name</span>
+        <p>Why it was out of scope, so nobody assumes it was ignored.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-head">
+      <h2>The evidence</h2>
+      <span>same prompt · same product · unedited output</span>
+    </div>
+
+    <div class="prompt-box">
+      <b>Prompt given to every tool, unchanged</b>
+      Paste the exact prompt here. Unchanged, including the ugly parts. The prompt is
+      the control — if a reader can't rerun it themselves, the comparison isn't evidence,
+      it's an opinion.
+    </div>
+
+    <div class="evidence">
+      <div class="clip">
+        <div class="frame is-winner"></div>
+        <div class="clip-label">
+          <span class="tool ph">Tool A</span>
+          <span class="badge win">Winner</span>
+        </div>
+        <p class="clip-note">What to look at in this clip — point at the specific frame
+          or moment that decided it.</p>
+      </div>
+      <div class="clip">
+        <div class="frame"></div>
+        <div class="clip-label">
+          <span class="tool ph">Tool B</span>
+          <span class="badge ph">grade</span>
+        </div>
+        <p class="clip-note">Where it held up and where it broke.</p>
+      </div>
+      <div class="clip">
+        <div class="frame"></div>
+        <div class="clip-label">
+          <span class="tool ph">Tool C</span>
+          <span class="badge ph">grade</span>
+        </div>
+        <p class="clip-note">Where it held up and where it broke.</p>
+      </div>
+      <div class="clip">
+        <div class="frame"></div>
+        <div class="clip-label">
+          <span class="tool ph">Tool D</span>
+          <span class="badge fail">Failed</span>
+        </div>
+        <p class="clip-note">The failure, described in one line. No softening.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-head">
+      <h2>The numbers</h2>
+      <span>measured, not quoted from pricing pages</span>
+    </div>
+
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Tool</th>
+            <th scope="col">Cost / usable clip</th>
+            <th scope="col">Renders to usable</th>
+            <th scope="col">Time / clip</th>
+            <th scope="col">Max length</th>
+            <th scope="col">Usable rate</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="is-winner">
+            <td class="ph">Tool A</td>
+            <td class="ph">$0.00</td>
+            <td class="ph">0.0</td>
+            <td class="ph">0m 00s</td>
+            <td class="ph">0s</td>
+            <td class="ph">00%</td>
+          </tr>
+          <tr>
+            <td class="ph">Tool B</td>
+            <td class="ph">$0.00</td>
+            <td class="ph">0.0</td>
+            <td class="ph">0m 00s</td>
+            <td class="ph">0s</td>
+            <td class="ph">00%</td>
+          </tr>
+          <tr>
+            <td class="ph">Tool C</td>
+            <td class="ph">$0.00</td>
+            <td class="ph">0.0</td>
+            <td class="ph">0m 00s</td>
+            <td class="ph">0s</td>
+            <td class="ph">00%</td>
+          </tr>
+          <tr>
+            <td class="ph">Tool D</td>
+            <td class="ph">$0.00</td>
+            <td class="ph">0.0</td>
+            <td class="ph">0m 00s</td>
+            <td class="ph">0s</td>
+            <td class="ph">00%</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-head">
+      <h2>How this was tested</h2>
+      <span>the part a chatbot cannot fake</span>
+    </div>
+
+    <div class="method">
+      <div>
+        <h3>What "usable" means</h3>
+        <p>Define the bar before rendering, in one sentence, and hold every tool to it.
+          Without a fixed bar, the winner is whoever you liked.</p>
+      </div>
+      <div>
+        <h3>What was held constant</h3>
+        <p>Prompt, product, aspect ratio, resolution, and date. List them so the test
+          can be repeated against you.</p>
+      </div>
+      <div>
+        <h3>How cost was counted</h3>
+        <p>Cost of <em>every</em> render, including the discarded ones, divided by clips
+          that cleared the bar. Not the sticker price per generation.</p>
+      </div>
+      <div>
+        <h3>Money disclosure</h3>
+        <p>State plainly whether any link pays a commission, and that it did not affect
+          the ranking. Say it before anyone asks.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    Structure: verdict → evidence → numbers → method. In that order, deliberately.<br />
+    A reader who leaves after the first block still got the answer. A reader who doubts
+    the answer can walk backwards through the proof.<br />
+    <span class="ph">Dashed text</span> marks every slot that must carry a real measured
+    value before publication.
+  </footer>
+
+</div>

@@ -70,7 +70,10 @@ MEMF=$(find .claude/agent-memory -type f -name '*.md' 2>/dev/null | wc -l | tr -
 LES=$(grep -rhc '^## 20' .claude/agent-memory/*/lessons.md 2>/dev/null | awk '{s+=$1} END{print s+0}')
 # рахуємо ЛИШЕ реальні записи, не шаблонні заголовки
 PLAY=$(grep -rh '^## ' .claude/agent-memory/*/playbook.md 2>/dev/null | grep -v 'Назва процедури' | wc -l | tr -d ' ')
-case "$N" in *1) [ "$N" = 11 ] && WORD="працівників" || WORD="працівник";; *2|*3|*4) WORD="працівники";; *) WORD="працівників";; esac
+case "$((N % 100))" in
+  1[1-4]) WORD="працівників";;
+  *) case "$((N % 10))" in 1) WORD="працівник";; 2|3|4) WORD="працівники";; *) WORD="працівників";; esac;;
+esac
 
 echo "=== ЦИФРОВА КОМПАНІЯ: $N $WORD ==="
 echo "Це не звичайний репозиторій. Тут постійний штат із памʼяттю. Штат УЖЕ ІСНУЄ —"

@@ -21,9 +21,9 @@ done < <(find .claude/agent-memory -name MEMORY.md 2>/dev/null)
 [ -n "$OVER" ] && WARN="${WARN}MEMORY.md перевищив 200 рядків: ${OVER}— почисти, інакше хвіст не потрапить у промпт. "
 
 # --- 2. секрети в пам'яті ---
-SECRETS=$(grep -rInE \
-  'sk-ant-[A-Za-z0-9_-]{20}|ghp_[A-Za-z0-9]{30}|github_pat_[A-Za-z0-9_]{30}|AKIA[0-9A-Z]{16}|BEGIN [A-Z ]*PRIVATE KEY|(api[_-]?key|secret|password|token)["'"'"']?\s*[:=]\s*["'"'"'][A-Za-z0-9_\-]{24,}' \
-  .claude/agent-memory company 2>/dev/null | head -5)
+SECRETS=$(grep -rIinE \
+  'sk-ant-[A-Za-z0-9_-]{20}|hf_[A-Za-z0-9]{30}|gh[pousr]_[A-Za-z0-9]{30}|github_pat_[A-Za-z0-9_]{30}|AKIA[0-9A-Z]{16}|sk-[A-Za-z0-9]{32}|sk_(live|test)_[A-Za-z0-9]{20}|xox[baprs]-[A-Za-z0-9-]{10}|AIza[0-9A-Za-z_-]{35}|glpat-[A-Za-z0-9_-]{20}|BEGIN [A-Z ]*PRIVATE KEY|(api[_-]?key|secret|passwd|password|token|credential)[a-z_]*["'"'"']?[[:space:]]*[:=][[:space:]]*["'"'"']?[A-Za-z0-9_/+=-]{24}' \
+  .claude/agent-memory company .claude/settings.json 2>/dev/null | head -5)
 [ -n "$SECRETS" ] && WARN="${WARN}УВАГА: схоже на секрет у пам'яті (вона комітиться в git): $(echo "$SECRETS" | cut -c1-160 | tr '\n' ' '). Прибери і зроти ключ. "
 
 # --- 2b. факти бізнесу у файлах ремесла ---

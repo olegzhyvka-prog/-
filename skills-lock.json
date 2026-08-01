@@ -115,6 +115,13 @@
       "skillPath": "skills/image/SKILL.md",
       "computedHash": "765c859592ba8bc959e54cb19aaa1fe7f249d021b5ac89e7531fb10a7cc7c584"
     },
+    "karpathy-guidelines": {
+      "source": "forrestchang/andrej-karpathy-skills",
+      "sourceType": "github",
+      "skillPath": "skills/karpathy-guidelines/SKILL.md",
+      "license": "MIT",
+      "computedHash": "6e22cc54cb02a5e98ae42d06d9d7292db0c1b43894831b32879beb0166b2aea7"
+    },
     "launch-strategy": {
       "source": "coreyhaines31/marketingskills",
       "sourceType": "github",
@@ -234,6 +241,34 @@
       "sourceType": "github",
       "skillPath": "skills/social-content/SKILL.md",
       "computedHash": "755e9cc7e222bc6196972e749a4eaebf97f9827a331a19265f220bbf7e3c234e"
+    },
+    "task-coordination-strategies": {
+      "source": "wshobson/agents",
+      "sourceType": "github",
+      "skillPath": "plugins/agent-teams/skills/task-coordination-strategies/SKILL.md",
+      "license": "MIT",
+      "computedHash": "e6e0c3f64b01f50d549a04d89c9a94128c5f0d24969c6e412952ff8cd9de36d7"
+    },
+    "task-observer": {
+      "source": "rebelytics/one-skill-to-rule-them-all",
+      "sourceType": "github",
+      "skillPath": "SKILL.md",
+      "license": "CC BY 4.0",
+      "computedHash": "60bfdcd99c4678a81e8adbd3a790c2a4b56cef95f25f90d3f091001380648fee"
+    },
+    "team-communication-protocols": {
+      "source": "wshobson/agents",
+      "sourceType": "github",
+      "skillPath": "plugins/agent-teams/skills/team-communication-protocols/SKILL.md",
+      "license": "MIT",
+      "computedHash": "5a356d8814f2b38312b83b6e3b4e5bf06e26423338a8ea568b9ff2ed3266ff1d"
+    },
+    "team-composition-patterns": {
+      "source": "wshobson/agents",
+      "sourceType": "github",
+      "skillPath": "plugins/agent-teams/skills/team-composition-patterns/SKILL.md",
+      "license": "MIT",
+      "computedHash": "e158dd0e38d875f7efd8d22fc00f800293585c9a44cce7c0715715f87feb164a"
     },
     "video": {
       "source": "coreyhaines31/marketingskills",

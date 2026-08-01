@@ -26,14 +26,14 @@
   Немає даних → скажи «немає» і назви, що потрібно.
 - **Мова спілкування із засновником — українська.**
 
-## Гілка
+## Гілки
 
-Компанія живе на `claude/digital-workers-solo-founder-b2zbxz`. Якщо ти бачиш репозиторій
-без `company/` і без `.claude/agents/` — ти на іншій гілці:
+Компанія є на `main`, на гілці за замовчуванням і на робочій
+`claude/digital-workers-solo-founder-b2zbxz` — однаково. Робота ведеться на робочій.
 
+Джерело правди — віддалений репозиторій, не файли в контейнері:
 ```bash
-git fetch origin claude/digital-workers-solo-founder-b2zbxz
-git checkout claude/digital-workers-solo-founder-b2zbxz
+git fetch origin && git status -sb
 ```
 
 ## Карта

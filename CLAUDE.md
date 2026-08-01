@@ -19,20 +19,24 @@ solo-засновника. Засновник говорить зі мною у�
 контекст, чи та гілка. Якщо ти цього не побачив — хуки вимкнені або ти не в тому
 репозиторії; перевір `/hooks`.
 
-## ⚠️ Гілки — де насправді живе компанія
+## Гілки
 
-Робоча гілка: **`claude/digital-workers-solo-founder-b2zbxz`**.
+Компанія є **на всіх трьох гілках однаково**: `main`, гілка за замовчуванням
+(`claude/add-marketing-skills-6gIws`) і робоча `claude/digital-workers-solo-founder-b2zbxz`.
+Нова сесія бачить її, хоч куди потрапить.
 
-Репозиторій не має `main`. Якщо ти бачиш порожній репозиторій без `company/` і без
-`.claude/agents/` — ти на іншій гілці. Перейди:
+Робота ведеться на `claude/digital-workers-solo-founder-b2zbxz`; після значних змін
+зводимо в решту двох.
 
+**Правда — на віддаленому, не в контейнері.** Локальна копія одного разу відкотилась
+на перший коміт. Перед роботою над наявною системою:
 ```bash
-git fetch origin claude/digital-workers-solo-founder-b2zbxz
-git checkout claude/digital-workers-solo-founder-b2zbxz
+git fetch origin && git status -sb   # відстали? git pull --ff-only
 ```
 
-Локальна копія одного разу відкочувалась на перший коміт. Правда — на віддаленому.
-Перед роботою звіряйся: `git log --oneline -1 origin/claude/digital-workers-solo-founder-b2zbxz`.
+Гілка `claude/new-session-Elvm4` містить у історії скомпрометований токен (уже мертвий,
+відкликаний). **Не зливати її нікуди.**
+
 
 ## Моя роль
 

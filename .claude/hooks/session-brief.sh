@@ -7,7 +7,6 @@ ROOT="${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null)}"
 cd "$ROOT" 2>/dev/null || exit 0
 [ -d .claude/agents ] || exit 0   # не компанія — мовчимо
 
-WORK="claude/digital-workers-solo-founder-b2zbxz"
 BR=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "?")
 N=$(ls .claude/agents/*.md 2>/dev/null | wc -l | tr -d ' ')
 MEMF=$(find .claude/agent-memory -type f -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
@@ -21,10 +20,15 @@ echo "Це не звичайний репозиторій. Тут постійн
 echo "не створюй його заново і не виконуй профільну роботу сам, якщо для неї є працівник."
 echo
 
-if [ "$BR" != "$WORK" ]; then
-  echo "⚠ УВАГА: ти на гілці «$BR», а компанія живе на «$WORK»."
-  echo "  Виконай:  git fetch origin $WORK && git checkout $WORK"
-  echo
+# Компанія є (перевірено вище). Попереджаємо не про назву гілки, а про реальну проблему:
+# локальна копія відстала від віддаленої — таке вже траплялось і коштувало плутанини.
+if git rev-parse --abbrev-ref '@{u}' >/dev/null 2>&1; then
+  BEHIND=$(git rev-list --count HEAD..'@{u}' 2>/dev/null || echo 0)
+  if [ "${BEHIND:-0}" -gt 0 ]; then
+    echo "⚠ Локальна копія відстала від віддаленої на $BEHIND комітів."
+    echo "  Виконай:  git pull --ff-only    (правда — на віддаленому, не в контейнері)"
+    echo
+  fi
 fi
 
 echo "Штат:     .claude/agents/ — виклик через Agent(subagent_type: <slug>)"
@@ -56,5 +60,6 @@ fi
 
 echo
 echo "Спочатку прочитай: CLAUDE.md → company/ROSTER.md → company/protocols/orchestration.md"
+echo "Гілка: $BR (компанія є на main, на гілці за замовчуванням і на робочій)"
 echo "Мова спілкування із засновником — українська."
 exit 0

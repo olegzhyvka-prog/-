@@ -40,6 +40,15 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>" >/dev/null 2>&1; then
       COMMITTED="пам'ять збережено в git"
       if git push -q origin "$BR" >/dev/null 2>&1; then
         COMMITTED="$COMMITTED і запушено ($BR)"
+        # Дзеркала: компанія має бути видима з будь-якої гілки, інакше нова сесія
+        # побачить застарілу памʼять. Звичайний (не force) push — якщо гілка
+        # розійшлась, він просто не пройде і нічого не зіпсує.
+        MIRRORED=""
+        for M in main claude/add-marketing-skills-6gIws; do
+          [ "$M" = "$BR" ] && continue
+          git push -q origin "HEAD:$M" >/dev/null 2>&1 && MIRRORED="$MIRRORED $M"
+        done
+        [ -n "$MIRRORED" ] && COMMITTED="$COMMITTED; синхронізовано:$MIRRORED"
       else
         COMMITTED="$COMMITTED, але пуш не пройшов — запуш вручну"
       fi

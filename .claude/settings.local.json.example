@@ -1,0 +1,7 @@
+{
+  "_коментар": "Скопіюйте цей файл у .claude/settings.local.json і впишіть свої ключі.",
+  "_важливо": "settings.local.json у .gitignore і НЕ потрапляє в git. settings.json — потрапляє. Ключі тільки тут.",
+  "env": {
+    "HF_TOKEN": "сюди_новий_токен"
+  }
+}

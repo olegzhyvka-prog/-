@@ -36,6 +36,18 @@
           }
         ]
       }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/precompact.sh",
+            "timeout": 15,
+            "statusMessage": "Фіксую стан перед стисненням"
+          }
+        ]
+      }
     ]
   }
 }

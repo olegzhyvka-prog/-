@@ -9,8 +9,15 @@ cd "$ROOT" 2>/dev/null || exit 0
 [ -d .claude/agent-memory ] || exit 0
 
 IN=$(cat 2>/dev/null || echo '{}')
-SID=$(printf '%s' "$IN" | python3 -c 'import json,sys;print(json.load(sys.stdin).get("session_id","x"))' 2>/dev/null || echo x)
-STATE="/tmp/.claude-mem-${SID}"
+# Ключ = сесія + працівник. Раніше був лише session_id: при 3–5 паралельних
+# працівниках недбалий «ховався» за оновленням сумлінного колеги (дефект Д2).
+KEY=$(printf '%s' "$IN" | python3 -c '
+import json,sys
+d=json.load(sys.stdin)
+sid=d.get("session_id","x")
+who=d.get("agent_name") or d.get("subagent_type") or d.get("agent_type") or "unknown"
+print(f"{sid}-{who}")' 2>/dev/null || echo "x-unknown")
+STATE="/tmp/.claude-mem-${KEY}"
 
 NOW=$(git status --porcelain .claude/agent-memory 2>/dev/null | md5sum | cut -d' ' -f1)
 PREV=$(cat "$STATE" 2>/dev/null || echo "")

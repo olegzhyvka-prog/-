@@ -65,10 +65,14 @@ solo-засновника. Засновник говорить українсь�
 - Памʼять: `.claude/agent-memory/<slug>/` — **комітиться в git**, це не кеш.
   Не додавати в `.gitignore`: без git памʼять зникне з контейнером.
   Ремесло — в корені теки; факти бізнесу — в `projects/<проєкт>/`.
-- Скіли: `.claude/skills/` (керування командою, дизайн, `humanizer`) і `.agents/skills/`
+- Скіли: 163 у проєкті. `.claude/skills/` (дизайн, реклама, SEO, керування) і `.agents/skills/`
   (маркетингові; у `.claude/skills/` вони симлінками, не копіями). Маркетинговий пак —
   `coreyhaines31/marketingskills`, стан зафіксовано в `skills-lock.json`; оновлення
   тільки через `npx skills add coreyhaines31/marketingskills -p`, не руками.
+  **Особистий скіл засновника перекриває проєктний із тією ж назвою.** Через це
+  `analytics`, `design`, `site-architecture` доступні під аліасами `analytics-tracking`,
+  `design-direction`, `site-structure`. Перед додаванням скіла — звірити назву з
+  `ls ~/.claude/skills`.
 - Активний стан задачі: `company/workspace/ACTIVE.md` — де ми спинились.
 
 ## Гілки

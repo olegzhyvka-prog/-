@@ -95,9 +95,35 @@ _«Це буде правдою в іншому бізнесі засновни�
 | видимість в AI-пошуку, цитування LLM | `ai-seo` | — |
 | structured data, JSON-LD | `schema` | — |
 | сторінки під ключі в обсязі | `programmatic-seo` | лише за реальної цінності сторінки |
-| структура сайту й перелінковка | `site-architecture` | — |
+| структура сайту й перелінковка | `site-structure` | аліас: назву `site-architecture` перекриває особистий скіл засновника |
 | каталоги й зовнішні посилання | `directory-submissions` | — |
 | сторінки «X vs Y» та «альтернативи» | `competitors` | — |
+
+**Пак `claude-seo` — 25 скілів `seo-*`.** Глибша деталізація поверх рядків вище.
+Беру рівно один рядок, а не «весь пак»:
+
+| Підзадача | Скіл |
+|---|---|
+| загальний вхід у SEO-задачу | `seo` |
+| повний аудит сайту (до 500 сторінок, субагенти) | `seo-audit-full` |
+| технічний аудит: crawl, index, CWV, JS-рендер | `seo-technical` |
+| одна конкретна сторінка | `seo-page` |
+| стратегія і роадмап | `seo-plan` · `seo-flow` |
+| AI Overviews, ChatGPT, Perplexity, llms.txt | `seo-geo` |
+| кластери тем за перетином SERP | `seo-cluster` |
+| бриф на текст | `seo-content-brief` · якість тексту: `seo-content` |
+| сторінки «vs» і «alternatives» | `seo-competitor-pages` |
+| зворотні посилання | `seo-backlinks` |
+| Search Console, PageSpeed, CrUX, GA4 | `seo-google` |
+| локальний бізнес, GBP, карти | `seo-local` · `seo-maps` |
+| зображення: alt, розміри, формати | `seo-images` |
+| sitemap · schema · hreflang | `seo-sitemap` · `seo-schema` · `seo-hreflang` |
+| контроль регресій після деплою | `seo-drift` |
+| чому сторінка не ранжується (тип ≠ інтент) | `seo-sxo` |
+
+**Не використовувати без рішення засновника:** `seo-dataforseo`, `seo-image-gen` та решта
+`extensions` пака — вони потребують платних сервісів (DataForSEO, Ahrefs, SERanking,
+Profound, Firecrawl). Самі extensions у репозиторій **не ставились**.
 
 Немає збігу — працюю без скіла. Вантажити «про всяк випадок» шкідливо: це забиває
 контекст і витісняє те, що справді потрібно.

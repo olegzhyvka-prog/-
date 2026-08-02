@@ -95,7 +95,18 @@ _«Це буде правдою в іншому бізнесі засновни�
 | рев'ю власних змін | `review` | — |
 | почистити код після реалізації | `simplify` | — |
 | зібрати сайт або лендінг | `site-builder` | — |
-| верстаю UI: компоненти, стилі, доступність | `ui-ux-pro-max` | готові патерни під 13 стеків, зокрема Tailwind і React |
+| верстаю UI: компоненти, стилі, доступність | `ui-ux-pro-max` | готові патерни під 22 стеки, зокрема Tailwind і React |
+| shadcn/ui, Tailwind, темна тема | `ui-styling` | — |
+| анімація на сайті | `gsap-core` | далі за потребою: `gsap-timeline`, `gsap-scrolltrigger`, `gsap-react`, `gsap-frameworks`, `gsap-plugins`, `gsap-utils`, `gsap-performance` |
+| що саме тут варто анімувати | `find-animation-opportunities` | тільки пропонує, не реалізує |
+| рев'ю наявних анімацій | `review-animations` · `improve-animations` | — |
+| не знаю, як називається цей ефект | `animation-vocabulary` | зворотний словник |
+| жести, пружини, sheet, momentum | `apple-design` | — |
+| полірування інтерфейсу перед здачею | `impeccable` | 59 детекторів, без LLM і ключів |
+| вибрати UI-бібліотеку під задачу | `pick-ui-library` | — |
+| кілька різних варіантів UI на вибір | `prototype` | — |
+| перевірити сайт у справжньому браузері | `agent-browser` | локальний Chromium; Browserbase-ключ НЕ потрібен |
+| відповідь не має бути обрізана | `output-skill` | коли треба повний код без «...» |
 | складний інтерактивний артефакт | `web-artifacts-builder` | — |
 | таблиці й дані в інтерфейсі | `data-tables` | — |
 

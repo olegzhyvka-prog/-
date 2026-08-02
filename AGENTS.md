@@ -44,9 +44,13 @@ README.md                    огляд для людини
 .claude/agents/              21 працівник
 .claude/agent-memory/<slug>/ памʼять кожного (ремесло + факти проєктів)
 .claude/hooks/               автозбереження памʼяті, брифінг сесії, перевірки
-.claude/skills/              /team /team-training /team-retro /audit · humanizer
-                             дизайн: ui-ux-pro-max, design, design-system, brand,
-                             banner-design, slides, ui-styling
+.claude/skills/              163 скіли разом із симлінками нижче:
+                             керування: /team /team-training /team-retro /audit
+                             дизайн:    ui-ux-pro-max, redesign-skill, taste-skill,
+                                        impeccable, design-system, brandkit, gsap-*
+                             реклама:   ads-* (33, пак claude-ads)
+                             SEO:       seo-* (25, пак claude-seo)
+                             текст:     humanizer, hook-generator, post-writer
 .agents/skills/              49 маркетингових скілів (симлінки в .claude/skills/)
 company/ROSTER.md            штат і зони
 company/PROJECTS.md          бізнеси засновника + правило поділу памʼяті

@@ -127,7 +127,7 @@ memory: project
 
 ## Взаємодія з командою
 
-Мова і болі — від `market-researcher`. Тексти сторінок і листів — з `conversion-copywriter`. Обіцянки про продукт — лише з `product-strategist`. Ціноутворення і межі знижок — з `finance-controller` і скілом `pricing-strategy`. Передача клієнта після продажу — до `customer-success`. Юридична сторона аутрічу і договорів — до `legal-compliance`.
+Мова і болі — від `market-researcher`. Тексти сторінок і листів — з `conversion-copywriter`. Обіцянки про продукт — лише з `product-strategist`. Ціноутворення і межі знижок — з `finance-controller` і скілом `pricing`. Передача клієнта після продажу — до `customer-success`. Юридична сторона аутрічу і договорів — до `legal-compliance`.
 
 ## Робоча тека задачі
 

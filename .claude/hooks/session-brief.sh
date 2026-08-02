@@ -20,6 +20,29 @@ try: print(json.load(sys.stdin).get("source","startup"))
 except Exception: print("startup")' 2>/dev/null || echo startup)
 
 ACTIVE="company/workspace/ACTIVE.md"
+LOOPS="company/workspace/OPEN-LOOPS.md"
+
+# --- чи не застарів записаний стан ---
+# Памʼять переживає сесію, стан виконання — ні. Стан тижневої давнини описує світ,
+# якого може вже не бути; продовжувати його як поточний — діяти наосліп.
+print_stale() {
+  [ -f "$ACTIVE" ] || return 0
+  D=$(grep -m1 '^\*\*Оновлено:\*\*' "$ACTIVE" 2>/dev/null | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}') || return 0
+  [ -z "$D" ] && return 0
+  AGE=$(python3 -c 'import sys,datetime
+try:
+    d=datetime.date.fromisoformat(sys.argv[1]); print((datetime.date.today()-d).days)
+except Exception: print(0)' "$D" 2>/dev/null || echo 0)
+  [ "${AGE:-0}" -ge 7 ] || return 0
+  case "$((AGE % 100))" in
+    1[1-4]) DW="днів";;
+    *) case "$((AGE % 10))" in 1) DW="день";; 2|3|4) DW="дні";; *) DW="днів";; esac;;
+  esac
+  echo "⚠ Активний стан не оновлювався $AGE $DW (з $D)."
+  echo "  Звір із фактами до продовження. Дозволи, видані в попередніх сесіях, НЕ діють —"
+  echo "  памʼять відновлює знання, не повноваження (source-of-truth.md)."
+  echo
+}
 
 # --- активний стан: друкуємо, лише якщо задача справді є ---
 print_active() {
@@ -31,6 +54,20 @@ print_active() {
   echo "Звір цей стан проти фактів (git status, файли), перш ніж діяти далі."
   echo "Ієрархія джерел правди — company/protocols/source-of-truth.md"
   return 0
+}
+
+# --- відкриті контури: живуть довше за задачу, тому окремо від ACTIVE.md ---
+# Друкуємо лише назви й стани: деталі працівник прочитає у файлі, якщо дійде до них.
+print_loops() {
+  [ -f "$LOOPS" ] || return 0
+  OUT=$(sed -n '/^## Відкриті/,/^## Закриті/p' "$LOOPS" 2>/dev/null \
+        | awk '/^### /{name=substr($0,5)} /^\*\*Стан:\*\*/{st=$0; sub(/^\*\*Стан:\*\* /,"",st); if(name!=""){printf "  · %s — %s\n", name, st; name=""}}')
+  [ -z "$OUT" ] && return 0
+  N=$(printf '%s\n' "$OUT" | wc -l | tr -d ' ')
+  echo "=== ВІДКРИТІ КОНТУРИ: $N (company/workspace/OPEN-LOOPS.md) ==="
+  printf '%s\n' "$OUT"
+  echo "Це не поточна задача — це те, що не можна загубити. Закривати тільки з причиною."
+  echo
 }
 
 # --- відставання від віддаленого (правда на віддаленому, не в контейнері) ---
@@ -51,6 +88,8 @@ case "$SRC" in
     echo "Звір, чи не втрачено ціль поточної роботи:"
     echo
     print_active || echo "Активної задачі не зафіксовано (company/workspace/ACTIVE.md порожній)."
+    echo
+    print_loops
     exit 0
     ;;
   resume|fork)
@@ -58,7 +97,10 @@ case "$SRC" in
     echo "Це не нова сесія — компанія та її правила вже описані в CLAUDE.md."
     echo
     print_behind
+    print_stale
     print_active || echo "Активної задачі не зафіксовано — спитай засновника, над чим працюємо."
+    echo
+    print_loops
     exit 0
     ;;
 esac
@@ -111,7 +153,9 @@ if [ -d company/projects ]; then
 fi
 
 echo
+print_stale
 print_active && echo
+print_loops
 
 echo "Спочатку прочитай: CLAUDE.md → company/ROSTER.md → company/protocols/orchestration.md"
 echo "Гілка: $BR (компанія є на main, на гілці за замовчуванням і на робочій)"

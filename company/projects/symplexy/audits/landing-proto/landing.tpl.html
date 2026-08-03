@@ -1,0 +1,682 @@
+<title>Symplexy — редизайн лендингу</title>
+<style>
+@font-face{font-family:Arsenal;src:url(data:font/woff2;base64,__ARSENAL__) format('woff2');font-weight:400;font-display:swap}
+@font-face{font-family:GeistMono;src:url(data:font/woff2;base64,__GEISTR__) format('woff2');font-weight:400;font-display:swap}
+@font-face{font-family:GeistMono;src:url(data:font/woff2;base64,__GEISTB__) format('woff2');font-weight:700;font-display:swap}
+
+:root{
+  --ink:#14113A; --ink-2:#4B4770; --ink-3:#7A76A0;
+  --bg:#F6F5FC; --surface:#FFFFFF; --surface-2:#FBFAFE;
+  --violet:#6B4EE6; --violet-ink:#5238C9; --violet-soft:#EDE9FD;
+  --blue:#2D6BF5; --blue-soft:#E4EDFE;
+  --deep:#171243; --deep-2:#221A5E;
+  --line:rgba(20,17,58,.10); --line-2:rgba(20,17,58,.06);
+  --on-deep:#EFEDFF; --on-deep-2:#A9A2DC;
+  --r:14px; --r-lg:20px;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root{
+  --ink:#EFEDFF; --ink-2:#B3AEDC; --ink-3:#807AB0;
+  --bg:#100D2E; --surface:#181343; --surface-2:#1C1650;
+  --violet:#9C86FF; --violet-ink:#B9A9FF; --violet-soft:#241C5C;
+  --blue:#6E9BFF; --blue-soft:#1B2456;
+  --deep:#0B0824; --deep-2:#150F3D;
+  --line:rgba(239,237,255,.14); --line-2:rgba(239,237,255,.08);
+}}
+:root[data-theme="dark"]{
+  --ink:#EFEDFF; --ink-2:#B3AEDC; --ink-3:#807AB0;
+  --bg:#100D2E; --surface:#181343; --surface-2:#1C1650;
+  --violet:#9C86FF; --violet-ink:#B9A9FF; --violet-soft:#241C5C;
+  --blue:#6E9BFF; --blue-soft:#1B2456;
+  --deep:#0B0824; --deep-2:#150F3D;
+  --line:rgba(239,237,255,.14); --line-2:rgba(239,237,255,.08);
+}
+:root[data-theme="light"]{
+  --ink:#14113A; --ink-2:#4B4770; --ink-3:#7A76A0;
+  --bg:#F6F5FC; --surface:#FFFFFF; --surface-2:#FBFAFE;
+  --violet:#6B4EE6; --violet-ink:#5238C9; --violet-soft:#EDE9FD;
+  --blue:#2D6BF5; --blue-soft:#E4EDFE;
+  --deep:#171243; --deep-2:#221A5E;
+  --line:rgba(20,17,58,.10); --line-2:rgba(20,17,58,.06);
+}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+  font-size:17px;line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px}
+h1,h2,h3{text-wrap:balance;margin:0;letter-spacing:-.025em;line-height:1.08;font-weight:760}
+h1{font-size:clamp(38px,5.4vw,68px)}
+h2{font-size:clamp(28px,3.4vw,44px)}
+h3{font-size:19px;letter-spacing:-.015em;line-height:1.3;font-weight:680}
+p{margin:0}
+.lede{font-size:clamp(17px,1.5vw,20px);color:var(--ink-2);max-width:62ch;line-height:1.5}
+.eyebrow{font-family:Arsenal,var(--sans);font-size:15px;letter-spacing:.14em;
+  color:var(--violet-ink);display:block;margin-bottom:14px}
+.eyebrow.on-deep{color:#B9A9FF}
+.mono{font-family:GeistMono,ui-monospace,monospace;font-variant-numeric:tabular-nums}
+section{padding:clamp(64px,8vw,116px) 0;position:relative}
+.deep{background:var(--deep);color:var(--on-deep)}
+.deep h2,.deep h3{color:#fff}
+.deep .lede{color:var(--on-deep-2)}
+
+/* фіолетовий ритм: тонка градієнтна лінія зверху кожної другої секції */
+.rhythm::before{content:"";position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--violet) 22%,var(--blue) 72%,transparent)}
+
+a{color:inherit}
+.btn{display:inline-flex;align-items:center;gap:9px;border:0;cursor:pointer;
+  font:inherit;font-weight:640;font-size:16px;padding:14px 24px;border-radius:12px;
+  text-decoration:none;transition:transform .18s cubic-bezier(.2,.8,.2,1),box-shadow .18s,background .18s}
+.btn:active{transform:translateY(1px) scale(.99)}
+.btn:focus-visible{outline:2px solid var(--violet);outline-offset:3px}
+.btn-v{background:var(--violet);color:#fff;box-shadow:0 6px 20px -6px rgba(107,78,230,.55)}
+.btn-v:hover{background:var(--violet-ink);box-shadow:0 10px 26px -6px rgba(107,78,230,.7)}
+.btn-b{background:var(--blue);color:#fff;box-shadow:0 6px 20px -6px rgba(45,107,245,.5)}
+.btn-b:hover{filter:brightness(1.08)}
+.btn-ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn-ghost:hover{border-color:var(--violet);color:var(--violet-ink)}
+.btn-sm{padding:10px 16px;font-size:15px;border-radius:10px}
+
+.card{background:var(--surface);border:1px solid var(--line-2);border-radius:var(--r-lg);padding:26px}
+.deep .card{background:var(--deep-2);border-color:rgba(255,255,255,.09)}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);
+  background:color-mix(in srgb,var(--bg) 86%,transparent);border-bottom:1px solid var(--line-2)}
+nav .wrap{display:flex;align-items:center;gap:28px;height:66px}
+.logo{font-weight:800;letter-spacing:-.02em;font-size:19px;display:flex;align-items:center;gap:9px}
+.logo i{width:10px;height:10px;border-radius:3px;display:block;
+  background:linear-gradient(140deg,var(--violet),var(--blue))}
+.navlinks{display:flex;gap:22px;margin-left:14px;font-size:15.5px;color:var(--ink-2)}
+.navlinks a{text-decoration:none}
+.navlinks a:hover{color:var(--violet-ink)}
+.navlinks a[aria-current]{color:var(--ink);font-weight:620}
+nav .btn{margin-left:auto}
+@media(max-width:860px){.navlinks{display:none}}
+
+/* HERO */
+.hero{padding-top:clamp(52px,6vw,86px);padding-bottom:0}
+.hero-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:56px;align-items:end}
+@media(max-width:940px){.hero-grid{grid-template-columns:1fr;gap:32px}}
+.hero h1 span{background:linear-gradient(96deg,var(--violet),var(--blue));
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.hero-cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}
+.hero-note{margin-top:16px;font-size:14.5px;color:var(--ink-3)}
+.hero-side{border-left:2px solid var(--violet);padding-left:20px}
+.hero-side dt{font-size:13px;letter-spacing:.1em;color:var(--ink-3);font-family:GeistMono,monospace}
+.hero-side dd{margin:2px 0 18px;font-size:15.5px;color:var(--ink-2);line-height:1.4}
+.hero-side dd:last-child{margin-bottom:0}
+
+/* СЛАЙДЕР ЗАПИТІВ */
+.rail-head{display:flex;align-items:baseline;gap:14px;margin:56px 0 16px;flex-wrap:wrap}
+.rail-head p{font-size:15px;color:var(--ink-3)}
+.rail{display:flex;gap:14px;overflow-x:auto;padding:4px 24px 34px;scroll-snap-type:x mandatory;
+  scrollbar-width:thin;margin:0 -24px}
+.rail::-webkit-scrollbar{height:6px}
+.rail::-webkit-scrollbar-thumb{background:var(--line);border-radius:99px}
+.q{scroll-snap-align:start;flex:0 0 272px;background:var(--surface);border:1px solid var(--line-2);
+  border-radius:var(--r);padding:20px;display:flex;flex-direction:column;gap:12px;
+  text-decoration:none;transition:transform .2s cubic-bezier(.2,.8,.2,1),border-color .2s,box-shadow .2s;
+  position:relative;overflow:hidden}
+.q::after{content:"";position:absolute;inset:0 auto 0 0;width:2px;background:var(--violet);
+  transform:scaleY(0);transform-origin:bottom;transition:transform .25s}
+.q:hover{transform:translateY(-3px);border-color:var(--line);box-shadow:0 12px 30px -14px rgba(20,17,58,.35)}
+.q:hover::after{transform:scaleY(1)}
+.q:nth-child(even)::after{background:var(--blue)}
+.q .tag{font-family:GeistMono,monospace;font-size:11.5px;letter-spacing:.09em;color:var(--ink-3)}
+.q .txt{font-size:17px;font-weight:600;line-height:1.32;letter-spacing:-.01em}
+.q .go{margin-top:auto;font-size:14.5px;font-weight:620;color:var(--violet-ink);display:flex;gap:6px}
+.q:nth-child(even) .go{color:var(--blue)}
+
+/* АСИСТЕНТ */
+.asst{display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);gap:52px;align-items:start}
+@media(max-width:940px){.asst{grid-template-columns:1fr;gap:34px}}
+.steps{list-style:none;padding:0;margin:28px 0 0;display:flex;flex-direction:column;gap:16px}
+.steps li{display:flex;gap:14px;align-items:flex-start}
+.steps b{font-family:GeistMono,monospace;font-size:13px;color:var(--violet-ink);
+  border:1px solid var(--violet-soft);background:var(--violet-soft);
+  border-radius:7px;padding:3px 7px;flex:0 0 auto;margin-top:2px}
+.steps span{font-size:16px;color:var(--ink-2);line-height:1.45}
+.steps strong{color:var(--ink);font-weight:640}
+.chat{background:var(--surface);border:1px solid var(--line-2);border-radius:var(--r-lg);
+  padding:22px;box-shadow:0 24px 60px -30px rgba(107,78,230,.45)}
+.chat-top{display:flex;align-items:center;gap:9px;padding-bottom:16px;border-bottom:1px solid var(--line-2);
+  font-size:14px;color:var(--ink-3);font-family:GeistMono,monospace;letter-spacing:.04em}
+.dot{width:7px;height:7px;border-radius:99px;background:#22C55E}
+.bubble{margin-top:16px;padding:14px 16px;border-radius:12px;font-size:15.5px;line-height:1.5}
+.bubble.user{background:var(--violet-soft);color:var(--ink);border-bottom-right-radius:4px;margin-left:56px}
+.bubble.bot{background:var(--surface-2);border:1px solid var(--line-2);border-bottom-left-radius:4px;margin-right:34px}
+.bubble.bot b{display:block;margin-bottom:4px;font-size:13px;letter-spacing:.06em;
+  font-family:GeistMono,monospace;color:var(--violet-ink);font-weight:400}
+.reco{margin-top:8px;display:grid;gap:8px}
+.reco div{display:flex;justify-content:space-between;gap:12px;font-size:14.5px;
+  padding:9px 12px;background:var(--surface);border:1px solid var(--line-2);border-radius:9px}
+.reco span:last-child{font-family:GeistMono,monospace;color:var(--ink-2);white-space:nowrap}
+.inputbar{margin-top:18px;display:flex;gap:9px;align-items:center;background:var(--surface-2);
+  border:1px solid var(--line);border-radius:12px;padding:7px 7px 7px 15px}
+.inputbar input{flex:1;border:0;background:transparent;font:inherit;font-size:15.5px;color:var(--ink);outline:none;min-width:0}
+.inputbar input::placeholder{color:var(--ink-3)}
+.send{border:0;background:var(--violet);color:#fff;width:38px;height:38px;border-radius:9px;
+  cursor:pointer;font-size:16px;display:grid;place-items:center;flex:0 0 auto}
+.send:hover{background:var(--violet-ink)}
+
+/* КАЛЬКУЛЯТОР */
+.calc{display:grid;grid-template-columns:minmax(0,.86fr) minmax(0,1.14fr);gap:52px;align-items:start}
+@media(max-width:940px){.calc{grid-template-columns:1fr;gap:32px}}
+.fields{display:grid;gap:14px}
+.field{display:flex;align-items:center;justify-content:space-between;gap:16px;
+  background:var(--deep-2);border:1px solid rgba(255,255,255,.09);border-radius:12px;padding:12px 16px}
+.field label{font-size:15px;color:var(--on-deep-2)}
+.field input{width:106px;text-align:right;background:transparent;border:0;border-bottom:1px solid rgba(255,255,255,.22);
+  color:#fff;font-family:GeistMono,monospace;font-size:17px;padding:2px 4px;outline:none}
+.field input:focus{border-color:#9C86FF}
+.result{margin-top:20px;display:grid;grid-template-columns:1fr 1fr;gap:1px;
+  background:rgba(255,255,255,.1);border-radius:16px;overflow:hidden}
+@media(max-width:560px){.result{grid-template-columns:1fr}}
+.result>div{background:var(--deep-2);padding:22px}
+.result .lbl{font-family:GeistMono,monospace;font-size:12px;letter-spacing:.1em;color:var(--on-deep-2)}
+.result .num{font-family:GeistMono,monospace;font-size:clamp(26px,3.2vw,36px);font-weight:700;
+  margin-top:8px;letter-spacing:-.02em;line-height:1}
+.result .now .num{color:#fff}
+.result .after .num{color:#7DE3B0}
+.result .sub{font-size:13.5px;color:var(--on-deep-2);margin-top:7px}
+.year{margin-top:1px;background:linear-gradient(96deg,var(--violet),var(--blue));
+  padding:22px;grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;
+  gap:16px;flex-wrap:wrap}
+.year .num{color:#fff;font-size:clamp(24px,3vw,34px)}
+.year .lbl{color:rgba(255,255,255,.85)}
+.disclaim{margin-top:16px;font-size:13.5px;color:var(--on-deep-2);max-width:60ch}
+
+/* СІТКИ */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+@media(max-width:940px){.grid-3,.grid-4{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:620px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr}}
+.head{margin-bottom:38px;max-width:66ch}
+
+/* ПОРІВНЯННЯ */
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(255,255,255,.1);
+  border-radius:16px;overflow:hidden;margin-top:8px}
+@media(max-width:700px){.cmp{grid-template-columns:1fr}}
+.cmp>div{background:var(--deep-2);padding:24px}
+.cmp h3{font-size:16px;font-family:GeistMono,monospace;font-weight:400;letter-spacing:.05em;margin-bottom:16px}
+.cmp ul{margin:0;padding:0;list-style:none;display:grid;gap:12px}
+.cmp li{font-size:15.5px;color:var(--on-deep-2);line-height:1.45;padding-left:20px;position:relative}
+.cmp li::before{content:"—";position:absolute;left:0;color:#5B5490}
+.cmp .us li::before{content:"+";color:#7DE3B0;font-weight:700}
+.cmp .us li{color:var(--on-deep)}
+
+/* КРОКИ */
+.flow{display:grid;gap:2px;background:var(--line-2);border-radius:16px;overflow:hidden;
+  grid-template-columns:repeat(4,1fr)}
+@media(max-width:860px){.flow{grid-template-columns:1fr 1fr}}
+@media(max-width:520px){.flow{grid-template-columns:1fr}}
+.flow>div{background:var(--surface);padding:24px}
+.flow .n{font-family:GeistMono,monospace;font-size:12.5px;letter-spacing:.12em;color:var(--violet-ink)}
+.flow h3{margin:12px 0 8px}
+.flow p{font-size:15px;color:var(--ink-2);line-height:1.45}
+
+/* КАТАЛОГ */
+.cat{border-radius:22px;padding:clamp(28px,4vw,44px);
+  background:var(--blue-soft);border:1px solid color-mix(in srgb,var(--blue) 22%,transparent)}
+.cat .eyebrow{color:var(--blue)}
+.cattags{display:flex;flex-wrap:wrap;gap:10px;margin:26px 0 28px}
+.cattags a{text-decoration:none;font-size:15px;font-weight:580;padding:9px 15px;border-radius:10px;
+  background:var(--surface);border:1px solid color-mix(in srgb,var(--blue) 20%,transparent);
+  color:var(--ink);transition:.18s}
+.cattags a:hover{background:var(--blue);color:#fff;border-color:var(--blue)}
+
+/* ЦІНА */
+.price{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+@media(max-width:820px){.price{grid-template-columns:1fr}}
+.price .card{display:flex;flex-direction:column;gap:10px}
+.price .card.hi{border-color:var(--violet);box-shadow:0 20px 50px -26px rgba(107,78,230,.6)}
+.price .p{font-family:GeistMono,monospace;font-size:26px;font-weight:700;letter-spacing:-.02em}
+.price p{font-size:15px;color:var(--ink-2);line-height:1.45}
+.price .btn{margin-top:auto}
+
+/* FAQ — не акордеон */
+.faq{display:grid;grid-template-columns:1fr 1fr;gap:28px 44px}
+@media(max-width:820px){.faq{grid-template-columns:1fr}}
+.faq h3{margin-bottom:7px}
+.faq p{font-size:15.5px;color:var(--ink-2);line-height:1.5}
+
+/* БЛОГ */
+.post{border-radius:var(--r);overflow:hidden;background:var(--surface);border:1px solid var(--line-2);
+  text-decoration:none;display:flex;flex-direction:column;transition:.2s}
+.post:hover{transform:translateY(-3px);box-shadow:0 14px 34px -18px rgba(20,17,58,.4)}
+.post .ph{aspect-ratio:16/9;background:
+  radial-gradient(120% 100% at 15% 0%,color-mix(in srgb,var(--violet) 55%,transparent),transparent 62%),
+  radial-gradient(100% 120% at 100% 100%,color-mix(in srgb,var(--blue) 55%,transparent),transparent 60%),
+  var(--deep)}
+.post .body{padding:18px;display:grid;gap:8px}
+.post .meta{font-family:GeistMono,monospace;font-size:12px;letter-spacing:.07em;color:var(--ink-3)}
+
+/* ФОРМА */
+.contact{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
+@media(max-width:860px){.contact{grid-template-columns:1fr;gap:30px}}
+.form{display:grid;gap:12px}
+.form input,.form textarea{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.16);
+  color:#fff;border-radius:11px;padding:14px 16px;font:inherit;font-size:16px;outline:none}
+.form input::placeholder,.form textarea::placeholder{color:#9089C8}
+.form input:focus,.form textarea:focus{border-color:#9C86FF;background:rgba(255,255,255,.1)}
+.err{font-size:13.5px;color:#FFA3A3;display:none}
+.err.on{display:block}
+
+/* ФУТЕР — формат збережено: гори + 3 колонки */
+footer{background:var(--deep);color:var(--on-deep);position:relative;padding-top:150px;overflow:hidden}
+.mtn{position:absolute;top:0;left:0;right:0;height:190px;pointer-events:none}
+.fgrid{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:40px;padding-bottom:36px}
+@media(max-width:820px){.fgrid{grid-template-columns:1fr;gap:26px}}
+.fgrid h4{font-family:GeistMono,monospace;font-size:12.5px;letter-spacing:.12em;
+  color:var(--on-deep-2);margin:0 0 14px;font-weight:400}
+.fgrid ul{list-style:none;margin:0;padding:0;display:grid;gap:9px;font-size:15.5px}
+.fgrid a{text-decoration:none;color:var(--on-deep)}
+.fgrid a:hover{color:#B9A9FF}
+.fbot{border-top:1px solid rgba(255,255,255,.11);padding:20px 0 34px;display:flex;
+  justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:14px;color:var(--on-deep-2)}
+.fbot a{text-decoration:none}
+
+.note{background:var(--violet-soft);border-left:3px solid var(--violet);border-radius:0 10px 10px 0;
+  padding:14px 18px;font-size:14.5px;color:var(--ink-2);margin-top:22px;line-height:1.5}
+.note b{color:var(--violet-ink)}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+.skip{position:absolute;left:-9999px;background:var(--violet);color:#fff;padding:10px 16px;border-radius:9px}
+.skip:focus{left:14px;top:14px;z-index:99}
+</style>
+
+<a href="#main" class="skip">Перейти до вмісту</a>
+
+<nav>
+  <div class="wrap">
+    <span class="logo"><i></i>SYMPLEXY</span>
+    <span class="navlinks">
+      <a href="#assistant" aria-current="page">Асистент</a>
+      <a href="#catalog">Каталог</a>
+      <a href="#calc">Калькулятор</a>
+      <a href="#price">Ціни</a>
+      <a href="#faq">Питання</a>
+    </span>
+    <a href="#assistant" class="btn btn-v btn-sm">Описати задачу</a>
+  </div>
+</nav>
+
+<main id="main">
+
+<!-- HERO -->
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-grid">
+      <div>
+        <span class="eyebrow">Підбір AI-інструментів</span>
+        <h1>Тисячі AI-інструментів. Вам потрібен <span>один</span> — той, що закриє вашу задачу.</h1>
+        <p class="lede" style="margin-top:22px">Опишіть, що треба зробити — звичайними словами.
+          У відповідь отримаєте конкретний інструмент, покрокове налаштування і чесну вартість.
+          Без «ознайомтеся з нашими рішеннями».</p>
+        <div class="hero-cta">
+          <a href="#assistant" class="btn btn-v">Описати свою задачу →</a>
+          <a href="#catalog" class="btn btn-b">Відкрити каталог</a>
+        </div>
+        <p class="hero-note">Підбір безкоштовний · реєстрація не потрібна · відповідь за 30 секунд</p>
+      </div>
+      <dl class="hero-side">
+        <dt>ЩО ВИ ОТРИМУЄТЕ</dt>
+        <dd>Назву інструмента, а не список із двадцяти варіантів</dd>
+        <dt>ЯК ШВИДКО</dt>
+        <dd>Одна відповідь замість трьох вечорів у ютубі</dd>
+        <dt>ЗА ЯКІ ГРОШІ</dt>
+        <dd>Вартість названа одразу — разом із безкоштовними варіантами</dd>
+      </dl>
+    </div>
+
+    <div class="rail-head">
+      <h2 style="font-size:20px;letter-spacing:-.01em">З чим приходять найчастіше</h2>
+      <p>Натисніть — асистент відкриється з цим запитом</p>
+    </div>
+  </div>
+  <div class="wrap" style="max-width:1180px">
+    <div class="rail">
+      <a class="q" href="#assistant"><span class="tag">ЗОБРАЖЕННЯ</span><span class="txt">Згенерувати 30 картинок для реклами</span><span class="go">Підібрати →</span></a>
+      <a class="q" href="#assistant"><span class="tag">РЕКЛАМА</span><span class="txt">Налаштувати рекламу в Meta без агенції</span><span class="go">Підібрати →</span></a>
+      <a class="q" href="#assistant"><span class="tag">СОЦМЕРЕЖІ</span><span class="txt">Вести Instagram: тексти і візуал</span><span class="go">Підібрати →</span></a>
+      <a class="q" href="#assistant"><span class="tag">АВТОМАТИЗАЦІЯ</span><span class="txt">Обробляти заявки з сайту цілодобово</span><span class="go">Підібрати →</span></a>
+      <a class="q" href="#assistant"><span class="tag">ВІДЕО</span><span class="txt">Різати Reels із довгого відео</span><span class="go">Підібрати →</span></a>
+      <a class="q" href="#assistant"><span class="tag">ПРОДАЖІ</span><span class="txt">Транскрибувати дзвінки і робити підсумки</span><span class="go">Підібрати →</span></a>
+      <a class="q" href="#assistant"><span class="tag">ТЕКСТИ</span><span class="txt">Описи для 500 товарів у каталозі</span><span class="go">Підібрати →</span></a>
+      <a class="q" href="#assistant"><span class="tag">АНАЛІТИКА</span><span class="txt">Розібрати таблицю на 10 000 рядків</span><span class="go">Підібрати →</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- АСИСТЕНТ -->
+<section id="assistant" class="rhythm">
+  <div class="wrap">
+    <div class="asst">
+      <div>
+        <span class="eyebrow">Асистент</span>
+        <h2>Не знаєте, як сформулювати? Це й не потрібно.</h2>
+        <p class="lede" style="margin-top:18px">Напишіть як є: «у мене на обробку заявок іде пів дня».
+          Асистент поставить два-три уточнення і видасть рішення.</p>
+        <ol class="steps">
+          <li><b>01</b><span><strong>Розбирає задачу.</strong> Питає лише те, що змінює відповідь — обсяг, бюджет, чи є розробник.</span></li>
+          <li><b>02</b><span><strong>Добирає інструмент.</strong> Один основний і один запасний, із причиною вибору.</span></li>
+          <li><b>03</b><span><strong>Дає план дій.</strong> Що підключити, у якому порядку, скільки коштує на місяць.</span></li>
+        </ol>
+        <div class="hero-cta"><a href="#calc" class="btn btn-ghost">Спершу порахувати економію</a></div>
+      </div>
+
+      <div class="chat">
+        <div class="chat-top"><span class="dot"></span>АСИСТЕНТ · ОНЛАЙН</div>
+        <div class="bubble user">У мене інтернет-магазин. Заявки з сайту обробляю руками, іде пів дня.</div>
+        <div class="bubble bot"><b>УТОЧНЕННЯ</b>Скільки заявок на день і куди вони мають потрапляти — CRM, таблиця, месенджер?</div>
+        <div class="bubble user">Близько 40. Хочу, щоб падали в Telegram і в Google Таблицю.</div>
+        <div class="bubble bot"><b>РІШЕННЯ</b>Це закривається зв'язкою з трьох елементів. Розробник не потрібен.
+          <div class="reco">
+            <div><span>Приймання і сортування заявок</span><span>від 0 ₴</span></div>
+            <div><span>Автовідповідь клієнту за 30 секунд</span><span>~450 ₴/міс</span></div>
+            <div><span>Вивантаження в Telegram і Таблицю</span><span>входить</span></div>
+          </div>
+        </div>
+        <div class="inputbar">
+          <input type="text" aria-label="Опишіть задачу" placeholder="Опишіть свою задачу…" value="У мене на обробку заявок іде пів дня">
+          <button class="send" aria-label="Надіслати">→</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- КАЛЬКУЛЯТОР -->
+<section id="calc" class="deep">
+  <div class="wrap">
+    <div class="calc">
+      <div>
+        <span class="eyebrow on-deep">Гроші</span>
+        <h2>Скільки коштує те, що ви робите руками</h2>
+        <p class="lede" style="margin-top:18px">Порахуйте за двадцять секунд, у гривнях,
+          а не в абстрактних годинах. Далі — підбір інструмента саме під цю задачу.</p>
+        <p class="disclaim">Рахунок за вашими числами. Ми не знаємо вашого бізнесу краще за вас —
+          цифра потрібна, щоб ви побачили порядок величини, а не щоб вразити вас.</p>
+      </div>
+
+      <div>
+        <div class="fields">
+          <div class="field"><label for="f1">Скільки разів на місяць</label><input id="f1" class="mono" type="number" value="20" min="1"></div>
+          <div class="field"><label for="f2">Скільки хвилин займає щоразу</label><input id="f2" class="mono" type="number" value="45" min="1"></div>
+          <div class="field"><label for="f3">Вартість години роботи, ₴</label><input id="f3" class="mono" type="number" value="380" min="1"></div>
+          <div class="field"><label for="f4">Скільки з цього забере інструмент, %</label><input id="f4" class="mono" type="number" value="80" min="0" max="100"></div>
+        </div>
+
+        <div class="result">
+          <div class="now">
+            <div class="lbl">ЗАРАЗ, НА МІСЯЦЬ</div>
+            <div class="num" id="rNow">5 700 ₴</div>
+            <div class="sub" id="rNowH">15 годин ручної роботи</div>
+          </div>
+          <div class="after">
+            <div class="lbl">ПІСЛЯ ВПРОВАДЖЕННЯ</div>
+            <div class="num" id="rAfter">1 140 ₴</div>
+            <div class="sub" id="rAfterH">3 години — решта на інструменті</div>
+          </div>
+          <div class="year">
+            <div><div class="lbl">РІЗНИЦЯ ЗА РІК</div><div class="num" id="rYear">54 720 ₴</div></div>
+            <a href="#assistant" class="btn" style="background:#fff;color:#3B2AA8">Підібрати інструмент під цю задачу →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ДОКАЗ -->
+<section class="rhythm">
+  <div class="wrap">
+    <div class="head">
+      <span class="eyebrow">Як це виглядає</span>
+      <h2>Один запит — одна відповідь. Ось вона повністю.</h2>
+      <p class="lede" style="margin-top:16px">Ніяких «залиште заявку і ми звʼяжемось».
+        Відповідь приходить одразу і виглядає так.</p>
+    </div>
+    <div class="grid-3">
+      <div class="card">
+        <span class="eyebrow" style="margin-bottom:8px">Запит</span>
+        <h3>«Треба щотижня робити 12 постів для двох акаунтів»</h3>
+        <p style="color:var(--ink-2);font-size:15px;margin-top:10px">Магазин домашнього текстилю, працює власниця і одна помічниця.</p>
+      </div>
+      <div class="card">
+        <span class="eyebrow" style="margin-bottom:8px">Що підібрано</span>
+        <h3>Зв'язка з двох інструментів + шаблон</h3>
+        <p style="color:var(--ink-2);font-size:15px;margin-top:10px">Один генерує тексти під голос бренду, другий — візуали в єдиному стилі. Шаблон публікації на тиждень уперед.</p>
+      </div>
+      <div class="card" style="border-color:var(--violet)">
+        <span class="eyebrow" style="margin-bottom:8px">Результат</span>
+        <h3 class="mono" style="font-size:30px;color:var(--violet-ink)">6 год → 50 хв</h3>
+        <p style="color:var(--ink-2);font-size:15px;margin-top:10px">На тиждень. Вартість інструментів — 720 ₴/міс.</p>
+      </div>
+    </div>
+    <div class="note"><b>Чернетка.</b> Це приклад формату, а не реальний кейс.
+      Перед публікацією сюди мають стати справжні цифри реального клієнта — інакше блок працює проти довіри.</div>
+  </div>
+</section>
+
+<!-- ЧОМУ НЕ ChatGPT -->
+<section class="deep">
+  <div class="wrap">
+    <div class="head">
+      <span class="eyebrow on-deep">Чесно</span>
+      <h2>«А чому не просто ChatGPT?»</h2>
+      <p class="lede" style="margin-top:16px">Питання правильне. ChatGPT — теж інструмент із каталогу.
+        Різниця не в тому, хто розумніший.</p>
+    </div>
+    <div class="cmp">
+      <div>
+        <h3>ЗАГАЛЬНИЙ ЧАТ</h3>
+        <ul>
+          <li>Порадить те, про що чув найбільше — не те, що дешевше саме під вашу задачу</li>
+          <li>Не знає, що інструмент підняв ціни минулого місяця</li>
+          <li>Дасть пораду, а не налаштування: далі розбиратись вам</li>
+          <li>Не рахує, скільки це коштуватиме на вашому обсязі</li>
+        </ul>
+      </div>
+      <div class="us">
+        <h3>SYMPLEXY</h3>
+        <ul>
+          <li>Порівнює під вашу задачу, обсяг і бюджет — і називає один варіант</li>
+          <li>Каталог оновлюється: ціни й обмеження актуальні</li>
+          <li>Дає порядок дій: що підключити першим, що другим</li>
+          <li>Показує вартість на місяць до того, як ви щось почали</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ЯК ЦЕ ПРАЦЮЄ -->
+<section class="rhythm">
+  <div class="wrap">
+    <div class="head">
+      <span class="eyebrow">Порядок</span>
+      <h2>Від запиту до працюючого рішення</h2>
+    </div>
+    <div class="flow">
+      <div><div class="n">КРОК 01</div><h3>Описуєте задачу</h3><p>Своїми словами. Форму заповнювати не треба.</p></div>
+      <div><div class="n">КРОК 02</div><h3>Отримуєте підбір</h3><p>Інструмент, причина вибору, вартість, запасний варіант.</p></div>
+      <div><div class="n">КРОК 03</div><h3>Підключаєте</h3><p>За інструкцією або з нашою допомогою — якщо потрібна.</p></div>
+      <div><div class="n">КРОК 04</div><h3>Рахуєте різницю</h3><p>Через місяць звіряєте з тим, що показав калькулятор.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- КАТАЛОГ -->
+<section id="catalog">
+  <div class="wrap">
+    <div class="cat">
+      <span class="eyebrow">Каталог</span>
+      <h2>Хочете обрати самі — каталог відкритий</h2>
+      <p class="lede" style="margin-top:16px">Асистент потрібен, коли не знаєш, із чого почати.
+        Коли знаєш — заходьте одразу в каталог і фільтруйте.</p>
+      <div class="cattags">
+        <a href="#">Зображення</a><a href="#">Відео</a><a href="#">Тексти</a><a href="#">Реклама</a>
+        <a href="#">Соцмережі</a><a href="#">Автоматизація</a><a href="#">Аналітика</a><a href="#">Голос і озвучка</a>
+        <a href="#">Переклад</a><a href="#">Презентації</a>
+      </div>
+      <a href="#" class="btn btn-b">Перейти в каталог →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ЦІНА -->
+<section id="price" class="rhythm">
+  <div class="wrap">
+    <div class="head">
+      <span class="eyebrow">Гроші, чесно</span>
+      <h2>Скільки це коштує</h2>
+      <p class="lede" style="margin-top:16px">Найчастіша причина, чому люди йдуть із сайтів, —
+        не знайшли ціни. Тому вона тут.</p>
+    </div>
+    <div class="price">
+      <div class="card">
+        <div class="p">0 ₴</div>
+        <h3>Підбір</h3>
+        <p>Опис задачі, підбір інструмента, вартість і план дій. Без реєстрації.</p>
+        <a href="#assistant" class="btn btn-ghost">Описати задачу</a>
+      </div>
+      <div class="card hi">
+        <div class="p" style="color:var(--violet-ink)">від 0 ₴</div>
+        <h3>Самі інструменти</h3>
+        <p>Платите напряму розробнику інструмента. Ми показуємо, де є безкоштовний тариф і де дешевше.</p>
+        <a href="#catalog" class="btn btn-v">Подивитись у каталозі</a>
+      </div>
+      <div class="card">
+        <div class="p">за домовленістю</div>
+        <h3>Впровадження під ключ</h3>
+        <p>Коли треба, щоб зробили за вас: налаштування, інтеграція, навчання команди.</p>
+        <a href="#contact" class="btn btn-ghost">Обговорити</a>
+      </div>
+    </div>
+    <div class="note"><b>Числа-чернетки.</b> Модель монетизації ще не підтверджена засновником —
+      підставити реальну перед публікацією.</div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+  <div class="wrap">
+    <div class="head"><span class="eyebrow">Питання</span><h2>Те, що питають до того, як почати</h2></div>
+    <div class="faq">
+      <div><h3>Я нічого не тямлю в нейромережах. Це для мене?</h3><p>Саме для вас. Асистент питає про задачу і бізнес, а не про моделі й токени. Технічні назви зʼявляються тільки в інструкції — і з поясненням.</p></div>
+      <div><h3>Скільки часу займе впровадження?</h3><p>Залежить від задачі. Проста автоматизація — вечір. Зв'язка з CRM і кількома каналами — до тижня. Асистент називає термін одразу.</p></div>
+      <div><h3>Мої дані кудись підуть?</h3><p>Опис задачі потрібен лише для підбору. Доступи до своїх систем ви нікому не передаєте — підключаєте самі за інструкцією.</p></div>
+      <div><h3>А якщо підібране не підійде?</h3><p>Напишіть, що не спрацювало — підбір повторимо з урахуванням цього. Це безкоштовно.</p></div>
+      <div><h3>Ви продаєте ці інструменти?</h3><p>Ні. Ви платите напряму розробнику. Тому нам немає сенсу штовхати дорожче.</p></div>
+      <div><h3>Працюєте з ФОП і з компаніями?</h3><p>Так. Для впровадження під ключ є договір і закривні документи.</p></div>
+    </div>
+    <div class="note"><b>Чернетка.</b> Відповіді написані під типові заперечення. Звірити з реальністю бізнесу перед публікацією — особливо про дані, повторний підбір і документи.</div>
+  </div>
+</section>
+
+<!-- БЛОГ -->
+<section class="rhythm">
+  <div class="wrap">
+    <div class="head" style="display:flex;justify-content:space-between;align-items:end;max-width:none;gap:20px;flex-wrap:wrap">
+      <div><span class="eyebrow">Блог</span><h2>Розбори без води</h2></div>
+      <a href="#" class="btn btn-ghost btn-sm">Усі статті →</a>
+    </div>
+    <div class="grid-3">
+      <a class="post" href="#"><div class="ph"></div><div class="body"><div class="meta">АВТОМАТИЗАЦІЯ · 14 ЛИПНЯ</div><h3>Скільки насправді коштує «безкоштовний» AI-інструмент</h3></div></a>
+      <a class="post" href="#"><div class="ph"></div><div class="body"><div class="meta">РЕКЛАМА · 2 ЛИПНЯ</div><h3>Сім задач у маркетингу, які закриваються без агенції</h3></div></a>
+      <a class="post" href="#"><div class="ph"></div><div class="body"><div class="meta">ПОМИЛКИ · 21 ЧЕРВНЯ</div><h3>Чому впровадження AI зупиняється на другому тижні</h3></div></a>
+    </div>
+  </div>
+</section>
+
+<!-- ФОРМА -->
+<section id="contact" class="deep">
+  <div class="wrap">
+    <div class="contact">
+      <div>
+        <span class="eyebrow on-deep">Звʼязок</span>
+        <h2>Лишились питання або є пропозиція?</h2>
+        <p class="lede" style="margin-top:16px">Заповніть форму — відповімо в робочий день.
+          Якщо задача термінова, краще опишіть її асистенту: він відповідає одразу.</p>
+      </div>
+      <form class="form" novalidate>
+        <input type="text" placeholder="Ваше ім'я" aria-label="Ваше ім'я" required>
+        <input type="email" id="em" placeholder="Email або телефон" aria-label="Email або телефон" required>
+        <span class="err" id="emErr">Схоже, в адресі помилка. Перевірте — має бути вигляду ім'я@пошта.com</span>
+        <textarea rows="3" placeholder="Коротко про задачу" aria-label="Коротко про задачу"></textarea>
+        <button type="submit" class="btn btn-v" style="justify-content:center">Надіслати</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <svg class="mtn" viewBox="0 0 1440 190" preserveAspectRatio="none" aria-hidden="true">
+    <defs>
+      <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#6B4EE6" stop-opacity=".55"/><stop offset="1" stop-color="#171243" stop-opacity="0"/>
+      </linearGradient>
+      <linearGradient id="g2" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#2D6BF5" stop-opacity=".4"/><stop offset="1" stop-color="#171243" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+    <path d="M0,190 L0,120 L180,52 L330,124 L470,72 L640,150 L760,96 L920,158 L1080,88 L1240,140 L1440,64 L1440,190 Z" fill="url(#g2)"/>
+    <path d="M0,190 L0,150 L210,96 L390,156 L560,110 L720,172 L880,124 L1050,168 L1220,116 L1440,160 L1440,190 Z" fill="url(#g1)"/>
+  </svg>
+  <div class="wrap">
+    <div class="fgrid">
+      <div>
+        <span class="logo" style="color:#fff"><i></i>SYMPLEXY</span>
+        <p style="color:var(--on-deep-2);font-size:15px;margin-top:12px;max-width:34ch">
+          Підбираємо AI-інструменти під конкретні задачі бізнесу — українською і без жаргону.</p>
+      </div>
+      <div>
+        <h4>НАВІГАЦІЯ</h4>
+        <ul><li><a href="#catalog">Каталог</a></li><li><a href="#assistant">Асистент</a></li>
+          <li><a href="#calc">Калькулятор</a></li><li><a href="#price">Ціни</a></li><li><a href="#faq">Питання</a></li></ul>
+      </div>
+      <div>
+        <h4>КОНТАКТИ</h4>
+        <ul><li><a href="#">hello@symplexy.ai</a></li><li><a href="#">Telegram</a></li><li><a href="#">LinkedIn</a></li></ul>
+      </div>
+    </div>
+    <div class="fbot">
+      <span>© 2026 Symplexy. Усі права захищені.</span>
+      <span><a href="#">Політика конфіденційності</a> · <a href="#">Угода користувача</a></span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var f=['f1','f2','f3','f4'].map(function(i){return document.getElementById(i)});
+  function fmt(n){return Math.round(n).toLocaleString('uk-UA').replace(/ /g,' ')+' ₴'}
+  function hrs(n){var h=Math.round(n*10)/10;return h+' год ручної роботи'}
+  function calc(){
+    var times=+f[0].value||0, mins=+f[1].value||0, rate=+f[2].value||0,
+        cut=Math.min(100,Math.max(0,+f[3].value||0))/100;
+    var h=times*mins/60, now=h*rate, after=now*(1-cut);
+    document.getElementById('rNow').textContent=fmt(now);
+    document.getElementById('rNowH').textContent=hrs(h);
+    document.getElementById('rAfter').textContent=fmt(after);
+    document.getElementById('rAfterH').textContent=hrs(h*(1-cut))+' — решта на інструменті';
+    document.getElementById('rYear').textContent=fmt((now-after)*12);
+  }
+  f.forEach(function(el){el.addEventListener('input',calc)});calc();
+
+  var em=document.getElementById('em'), err=document.getElementById('emErr');
+  document.querySelector('.form').addEventListener('submit',function(e){
+    e.preventDefault();
+    var v=em.value.trim(), ok=/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(v)||/^[+0-9()\s-]{9,}$/.test(v);
+    err.classList.toggle('on',!ok);
+    if(ok){var b=this.querySelector('button');b.textContent='Надіслано';b.disabled=true}
+  });
+})();
+</script>

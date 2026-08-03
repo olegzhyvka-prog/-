@@ -1,0 +1,522 @@
+<title>Symplexy — напрям 2</title>
+<style>
+@font-face{font-family:Plex;src:url(data:font/woff2;base64,__PLEXR__) format('woff2');font-weight:400}
+@font-face{font-family:Plex;src:url(data:font/woff2;base64,__PLEXB__) format('woff2');font-weight:700}
+@font-face{font-family:Arsenal;src:url(data:font/woff2;base64,__ARSENAL__) format('woff2');font-weight:400}
+@font-face{font-family:Mono;src:url(data:font/woff2;base64,__GEISTR__) format('woff2');font-weight:400}
+@font-face{font-family:Mono;src:url(data:font/woff2;base64,__GEISTB__) format('woff2');font-weight:700}
+
+:root{
+  --void:#0B0818;        /* основа */
+  --void-2:#120E24;      /* підняті поверхні */
+  --paper:#F2F0EA;       /* світлі «сторінки» довідника */
+  --paper-ink:#161228;
+  --chalk:#EDEAF7; --chalk-2:#9C96BE; --chalk-3:#615A85;
+  --violet:#8B6BFF; --violet-deep:#5B3BD6;
+  --blue:#4C86FF;
+  --rule:rgba(237,234,247,.13); --rule-2:rgba(237,234,247,.07);
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --col:88px; --gut:24px;
+}
+*{box-sizing:border-box}
+a{color:inherit}
+body{margin:0;background:var(--void);color:var(--chalk);font-family:var(--sans);
+  font-size:16.5px;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+
+/* сітка видно — як у довіднику */
+.grid-lines{position:fixed;inset:0;pointer-events:none;z-index:0;display:flex;
+  justify-content:center;opacity:.5}
+.grid-lines i{width:1px;background:var(--rule-2);height:100%}
+.grid-lines span{width:calc((min(100vw,1320px) - 48px - 5px)/6)}
+
+.wrap{max-width:1320px;margin:0 auto;padding:0 24px;position:relative;z-index:1}
+h1,h2,h3{margin:0;font-family:Plex,Georgia,serif;font-weight:700;
+  letter-spacing:-.028em;line-height:1.03;text-wrap:balance}
+h1{font-size:clamp(44px,6.6vw,92px)}
+h2{font-size:clamp(30px,4.1vw,56px)}
+h3{font-size:21px;line-height:1.22;letter-spacing:-.018em}
+p{margin:0}
+.lede{font-size:clamp(17px,1.35vw,19.5px);color:var(--chalk-2);max-width:56ch;line-height:1.62}
+
+.lbl{font-family:Arsenal,var(--sans);font-size:15px;letter-spacing:.2em;color:var(--violet);
+  display:flex;align-items:center;gap:14px}
+.lbl::after{content:"";height:1px;flex:1;background:var(--rule);max-width:180px}
+.mono{font-family:Mono,ui-monospace,monospace;font-variant-numeric:tabular-nums}
+
+/* лінія горизонту — наскрізний мотив, узятий із футера */
+.horizon{display:block;width:100%;height:26px}
+.horizon path{fill:none;stroke:var(--rule);stroke-width:1}
+.horizon .hi{stroke:color-mix(in srgb,var(--violet) 45%,transparent)}
+
+section{padding:clamp(76px,9vw,132px) 0;position:relative}
+.paper{background:var(--paper);color:var(--paper-ink)}
+.paper .lede{color:#4A4363}
+.paper .lbl{color:var(--violet-deep)}
+.paper .lbl::after{background:rgba(22,18,40,.16)}
+
+/* кнопки: суцільна заливка або контур. жодних градієнтів і світінь */
+.btn{display:inline-flex;align-items:center;gap:10px;border:1px solid transparent;cursor:pointer;
+  font:inherit;font-weight:600;font-size:16px;padding:15px 26px;border-radius:4px;
+  text-decoration:none;transition:background .18s,color .18s,border-color .18s}
+.btn-v{background:var(--violet);color:#0B0818}
+.btn-v:hover{background:#A48CFF}
+.btn-o{border-color:var(--rule);color:var(--chalk)}
+.btn-o:hover{border-color:var(--blue);color:var(--blue)}
+.paper .btn-o{border-color:rgba(22,18,40,.22);color:var(--paper-ink)}
+.paper .btn-o:hover{border-color:var(--blue);color:var(--blue)}
+.btn-b{border-color:var(--blue);color:var(--blue)}
+.btn-b:hover{background:var(--blue);color:#fff}
+
+nav{border-bottom:1px solid var(--rule-2);position:relative;z-index:2}
+nav .wrap{display:flex;align-items:center;gap:34px;height:78px}
+.logo{font-family:Plex,serif;font-weight:700;font-size:20px;letter-spacing:.02em}
+.logo b{color:var(--violet)}
+.nl{display:flex;gap:26px;font-size:15px;color:var(--chalk-2)}
+.nl a{text-decoration:none}.nl a:hover{color:var(--chalk)}
+nav .btn{margin-left:auto;padding:11px 20px;font-size:15px}
+@media(max-width:900px){.nl{display:none}}
+
+/* HERO — асиметрія 7/12, рейка вилітає за край */
+.hero{padding-top:clamp(64px,7vw,112px);padding-bottom:0}
+.hero-in{display:grid;grid-template-columns:repeat(12,1fr);gap:var(--gut);align-items:end}
+.hero-txt{grid-column:1/8}
+.hero-meta{grid-column:9/13;padding-bottom:10px}
+@media(max-width:980px){.hero-txt,.hero-meta{grid-column:1/13}.hero-meta{padding-top:26px}}
+h1 em{font-style:normal;color:var(--violet)}
+.hero .lede{margin-top:26px}
+.hero-act{display:flex;gap:12px;margin-top:34px;flex-wrap:wrap}
+.hero-meta dl{margin:0;display:grid;gap:20px}
+.hero-meta dt{font-family:Mono,monospace;font-size:11.5px;letter-spacing:.14em;color:var(--chalk-3)}
+.hero-meta dd{margin:5px 0 0;font-size:15.5px;color:var(--chalk-2);line-height:1.45;
+  padding-top:12px;border-top:1px solid var(--rule-2)}
+
+/* РЕЙКА ЗАПИТІВ */
+.railwrap{margin-top:clamp(56px,7vw,92px);border-top:1px solid var(--rule-2);padding-top:22px}
+.railhead{display:flex;justify-content:space-between;align-items:baseline;gap:20px;
+  font-size:14px;color:var(--chalk-3);font-family:Mono,monospace;letter-spacing:.09em;padding-bottom:20px}
+.rail{display:flex;gap:0;overflow-x:auto;scrollbar-width:none}
+.rail::-webkit-scrollbar{display:none}
+.q{flex:0 0 288px;padding:26px 26px 26px 0;margin-right:26px;border-right:1px solid var(--rule-2);
+  text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:14px;
+  transition:background .2s;position:relative}
+.q:hover{background:rgba(139,107,255,.05)}
+.q .n{font-family:Mono,monospace;font-size:11.5px;color:var(--chalk-3);letter-spacing:.12em}
+.q .t{font-family:Plex,serif;font-size:21px;line-height:1.24;letter-spacing:-.015em}
+.q .g{margin-top:auto;font-size:14px;color:var(--violet);font-family:Mono,monospace;letter-spacing:.06em}
+.q:nth-child(3n+2) .g{color:var(--blue)}
+
+/* АСИСТЕНТ */
+.two{display:grid;grid-template-columns:repeat(12,1fr);gap:var(--gut)}
+.two .a{grid-column:1/6}.two .b{grid-column:7/13}
+@media(max-width:980px){.two .a,.two .b{grid-column:1/13}.two .b{margin-top:34px}}
+.steps{list-style:none;margin:34px 0 0;padding:0;display:grid;gap:0}
+.steps li{display:grid;grid-template-columns:56px 1fr;gap:18px;padding:20px 0;
+  border-top:1px solid var(--rule-2)}
+.steps li:last-child{border-bottom:1px solid var(--rule-2)}
+.steps .k{font-family:Mono,monospace;font-size:12px;color:var(--violet);letter-spacing:.1em;padding-top:3px}
+.steps h3{font-size:17.5px;font-family:var(--sans);font-weight:640;letter-spacing:-.01em}
+.steps p{font-size:15px;color:var(--chalk-2);margin-top:5px;line-height:1.5}
+
+.panel{background:var(--void-2);border:1px solid var(--rule-2);border-radius:6px;padding:28px}
+.ptop{display:flex;justify-content:space-between;font-family:Mono,monospace;font-size:11.5px;
+  letter-spacing:.13em;color:var(--chalk-3);padding-bottom:20px;border-bottom:1px solid var(--rule-2)}
+.msg{padding:18px 0;border-bottom:1px solid var(--rule-2)}
+.msg .who{font-family:Mono,monospace;font-size:11px;letter-spacing:.14em;color:var(--chalk-3);margin-bottom:8px}
+.msg.you .who{color:var(--blue)}
+.msg.ai .who{color:var(--violet)}
+.msg p{font-size:16px;line-height:1.5}
+.msg.you p{color:var(--chalk)}
+.rows{margin-top:16px;display:grid}
+.rows div{display:flex;justify-content:space-between;gap:16px;padding:11px 0;
+  border-top:1px dotted var(--rule);font-size:14.5px;color:var(--chalk-2)}
+.rows div span:last-child{font-family:Mono,monospace;color:var(--chalk);white-space:nowrap}
+.ask{display:flex;gap:14px;align-items:center;padding-top:20px;font-size:15.5px;color:var(--chalk-3)}
+.ask i{width:2px;height:19px;background:var(--violet);display:block;animation:bl 1.1s steps(1) infinite}
+@keyframes bl{50%{opacity:0}}
+
+/* ЦИФРА — калькулятор як розворот довідника */
+.calcgrid{display:grid;grid-template-columns:repeat(12,1fr);gap:var(--gut);align-items:start}
+.calcgrid .a{grid-column:1/5}.calcgrid .b{grid-column:6/13}
+@media(max-width:980px){.calcgrid .a,.calcgrid .b{grid-column:1/13}.calcgrid .b{margin-top:38px}}
+.inputs{display:grid;gap:0;border-top:1px solid rgba(22,18,40,.14)}
+.inputs label{display:flex;justify-content:space-between;align-items:center;gap:20px;
+  padding:15px 0;border-bottom:1px solid rgba(22,18,40,.14);font-size:15.5px}
+.inputs input{width:120px;text-align:right;border:0;border-bottom:1px solid rgba(22,18,40,.3);
+  background:transparent;font-family:Mono,monospace;font-size:18px;color:var(--paper-ink);
+  padding:3px 4px;outline:none}
+.inputs input:focus{border-color:var(--violet-deep)}
+.figures{display:grid;grid-template-columns:1fr 1fr;gap:var(--gut);margin-top:38px}
+@media(max-width:640px){.figures{grid-template-columns:1fr}}
+.fig .c{font-family:Mono,monospace;font-size:11.5px;letter-spacing:.14em;color:#78708F}
+.fig .v{font-family:Mono,monospace;font-size:clamp(30px,3.6vw,46px);font-weight:700;
+  letter-spacing:-.045em;line-height:1;margin-top:12px;white-space:nowrap}
+.fig .s{font-size:14px;color:#78708F;margin-top:9px}
+.fig.b .v{color:var(--violet-deep)}
+.total{margin-top:34px;padding-top:26px;border-top:2px solid var(--paper-ink);
+  display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap}
+.total .v{font-family:Mono,monospace;font-size:clamp(34px,4.4vw,56px);font-weight:700;letter-spacing:-.045em;line-height:1;white-space:nowrap}
+
+/* ДОКАЗ — розворот */
+.spec{display:grid;grid-template-columns:repeat(12,1fr);gap:var(--gut);
+  border-top:1px solid var(--rule);padding-top:30px;margin-top:44px}
+.spec .k{grid-column:1/4;font-family:Mono,monospace;font-size:11.5px;letter-spacing:.14em;color:var(--chalk-3)}
+.spec .v{grid-column:4/13}
+@media(max-width:840px){.spec .k,.spec .v{grid-column:1/13}.spec .v{margin-top:10px}}
+.spec .v p{color:var(--chalk-2);font-size:16px;margin-top:8px}
+.big{font-family:Mono,monospace;font-size:clamp(30px,3.8vw,48px);font-weight:700;
+  letter-spacing:-.045em;color:var(--violet);white-space:nowrap}
+
+/* ПОРІВНЯННЯ */
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-top:44px;border-top:1px solid var(--rule)}
+@media(max-width:760px){.vs{grid-template-columns:1fr}}
+.vs>div{padding:30px 34px 30px 0}
+.vs>div+div{border-left:1px solid var(--rule);padding-left:34px}
+@media(max-width:760px){.vs>div+div{border-left:0;border-top:1px solid var(--rule);padding-left:0}}
+.vs h3{font-family:Mono,monospace;font-size:12px;letter-spacing:.16em;font-weight:400;color:var(--chalk-3)}
+.vs .us h3{color:var(--violet)}
+.vs ul{list-style:none;margin:22px 0 0;padding:0;display:grid;gap:16px}
+.vs li{font-size:16px;line-height:1.5;color:var(--chalk-3)}
+.vs .us li{color:var(--chalk-2)}
+
+/* КРОКИ */
+.flow{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:44px;
+  border-top:1px solid rgba(22,18,40,.16)}
+@media(max-width:900px){.flow{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.flow{grid-template-columns:1fr}}
+.flow>div{padding:28px 28px 34px 0;border-right:1px solid rgba(22,18,40,.16)}
+.flow>div:last-child{border-right:0}
+.flow .k{font-family:Mono,monospace;font-size:11.5px;letter-spacing:.14em;color:var(--violet-deep)}
+.flow h3{margin:16px 0 10px;font-size:20px}
+.flow p{font-size:15px;color:#4A4363;line-height:1.5}
+
+/* КАТАЛОГ */
+.cats{display:flex;flex-wrap:wrap;gap:0;margin-top:36px;border-top:1px solid var(--rule)}
+.cats a{flex:1 1 200px;padding:22px 24px 22px 0;border-bottom:1px solid var(--rule);
+  text-decoration:none;color:var(--chalk);font-size:18px;font-family:Plex,serif;
+  display:flex;justify-content:space-between;align-items:center;gap:14px;transition:.2s}
+.cats a::after{content:"→";font-family:Mono,monospace;font-size:14px;color:var(--blue);opacity:.55}
+.cats a:hover{color:var(--blue);padding-left:10px}
+.cats a:hover::after{opacity:1}
+
+/* ЦІНА */
+.tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-top:44px;border-top:1px solid var(--rule)}
+@media(max-width:880px){.tiers{grid-template-columns:1fr}}
+.tiers>div{padding:30px 30px 30px 0;border-right:1px solid var(--rule);display:flex;flex-direction:column;gap:12px}
+.tiers>div:last-child{border-right:0}
+@media(max-width:880px){.tiers>div{border-right:0;border-bottom:1px solid var(--rule)}}
+.tiers .p{font-family:Mono,monospace;font-size:34px;font-weight:700;letter-spacing:-.045em;white-space:nowrap}
+.tiers .hl .p{color:var(--violet)}
+.tiers p{font-size:15px;color:var(--chalk-2);line-height:1.5}
+.tiers .btn{margin-top:auto;align-self:flex-start}
+
+/* FAQ */
+.qa{display:grid;grid-template-columns:1fr 1fr;gap:0 var(--gut);margin-top:44px}
+@media(max-width:840px){.qa{grid-template-columns:1fr}}
+.qa div{padding:26px 0;border-top:1px solid rgba(22,18,40,.14)}
+.qa h3{font-size:18.5px;margin-bottom:9px}
+.qa p{font-size:15.5px;color:#4A4363;line-height:1.55}
+
+/* ФОРМА */
+.form{display:grid;gap:0;margin-top:10px}
+.form input,.form textarea{background:transparent;border:0;border-bottom:1px solid var(--rule);
+  color:var(--chalk);padding:18px 0;font:inherit;font-size:17px;outline:none;font-family:var(--sans)}
+.form input::placeholder,.form textarea::placeholder{color:var(--chalk-3)}
+.form input:focus,.form textarea:focus{border-color:var(--violet)}
+.form .btn{margin-top:26px;justify-self:start}
+
+/* ФУТЕР — гори збережені, тепер вони горизонт усієї сторінки */
+footer{background:var(--void);padding-top:0;position:relative;z-index:1}
+.range{display:block;width:100%;height:clamp(140px,17vw,220px)}
+.fg{display:grid;grid-template-columns:2fr 1fr 1fr;gap:var(--gut);
+  padding:44px 0 34px;border-top:1px solid var(--rule-2)}
+@media(max-width:840px){.fg{grid-template-columns:1fr;gap:28px}}
+.fg h4{font-family:Mono,monospace;font-size:11.5px;letter-spacing:.14em;color:var(--chalk-3);
+  margin:0 0 16px;font-weight:400}
+.fg ul{list-style:none;margin:0;padding:0;display:grid;gap:11px;font-size:16px}
+.fg a{text-decoration:none;color:var(--chalk-2)}.fg a:hover{color:var(--violet)}
+.fb{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;
+  padding:22px 0 40px;border-top:1px solid var(--rule-2);font-size:14px;color:var(--chalk-3)}
+.fb a{text-decoration:none}
+.draft{margin-top:26px;padding-left:18px;border-left:2px solid var(--violet);
+  font-size:14px;color:var(--chalk-3);line-height:1.55;max-width:64ch}
+.paper .draft{color:#6B6488;border-color:var(--violet-deep)}
+</style>
+
+<div class="grid-lines"><i></i><span></span><i></i><span></span><i></i><span></span><i></i><span></span><i></i><span></span><i></i><span></span><i></i></div>
+
+<nav><div class="wrap">
+  <span class="logo">SYMPLEXY<b>.</b></span>
+  <span class="nl"><a href="#">Асистент</a><a href="#">Каталог</a><a href="#">Калькулятор</a><a href="#">Ціни</a><a href="#">Блог</a></span>
+  <a href="#" class="btn btn-o">Описати задачу</a>
+</div></nav>
+
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-in">
+      <div class="hero-txt">
+        <span class="lbl">ПІДБІР ІНСТРУМЕНТІВ</span>
+        <h1 style="margin-top:30px">Тисячі AI-інструментів.<br>Вам потрібен <em>один</em>.</h1>
+        <p class="lede">Опишіть задачу звичайними словами — отримаєте назву інструмента,
+          порядок підключення і вартість на місяць. Не список із двадцяти варіантів. Один.</p>
+        <div class="hero-act">
+          <a href="#" class="btn btn-v">Описати задачу</a>
+          <a href="#" class="btn btn-b">Каталог</a>
+        </div>
+      </div>
+      <div class="hero-meta"><dl>
+        <div><dt>ВІДПОВІДЬ</dt><dd>30 секунд замість трьох вечорів у ютубі</dd></div>
+        <div><dt>ВАРТІСТЬ ПІДБОРУ</dt><dd>0 ₴ — платите тільки за самі інструменти</dd></div>
+        <div><dt>РЕЄСТРАЦІЯ</dt><dd>Не потрібна</dd></div>
+      </dl></div>
+    </div>
+
+    <div class="railwrap">
+      <div class="railhead"><span>З ЧИМ ПРИХОДЯТЬ НАЙЧАСТІШЕ</span><span>01 — 08</span></div>
+      <div class="rail">
+        <a class="q" href="#"><span class="n">01 · ЗОБРАЖЕННЯ</span><span class="t">Згенерувати 30 картинок для реклами</span><span class="g">ПІДІБРАТИ →</span></a>
+        <a class="q" href="#"><span class="n">02 · РЕКЛАМА</span><span class="t">Налаштувати рекламу в Meta без агенції</span><span class="g">ПІДІБРАТИ →</span></a>
+        <a class="q" href="#"><span class="n">03 · СОЦМЕРЕЖІ</span><span class="t">Вести Instagram: тексти і візуал</span><span class="g">ПІДІБРАТИ →</span></a>
+        <a class="q" href="#"><span class="n">04 · ЗАЯВКИ</span><span class="t">Обробляти звернення з сайту цілодобово</span><span class="g">ПІДІБРАТИ →</span></a>
+        <a class="q" href="#"><span class="n">05 · ВІДЕО</span><span class="t">Різати Reels із довгого відео</span><span class="g">ПІДІБРАТИ →</span></a>
+        <a class="q" href="#"><span class="n">06 · ПРОДАЖІ</span><span class="t">Транскрибувати дзвінки і робити підсумки</span><span class="g">ПІДІБРАТИ →</span></a>
+      </div>
+    </div>
+  </div>
+  <svg class="horizon" viewBox="0 0 1440 26" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M0,24 L240,9 L420,20 L660,4 L880,18 L1120,7 L1440,21"/>
+  </svg>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="two">
+      <div class="a">
+        <span class="lbl">АСИСТЕНТ</span>
+        <h2 style="margin-top:28px">Не знаєте, як сформулювати? Це й не потрібно.</h2>
+        <p class="lede" style="margin-top:24px">Напишіть як є: «у мене на обробку заявок іде пів дня».
+          Два уточнення — і рішення.</p>
+        <ol class="steps">
+          <li><span class="k">01</span><div><h3>Розбирає задачу</h3><p>Питає лише те, що змінює відповідь: обсяг, бюджет, чи є розробник.</p></div></li>
+          <li><span class="k">02</span><div><h3>Добирає інструмент</h3><p>Один основний, один запасний — із причиною вибору.</p></div></li>
+          <li><span class="k">03</span><div><h3>Дає порядок дій</h3><p>Що підключити першим, що другим, скільки коштує на місяць.</p></div></li>
+        </ol>
+      </div>
+      <div class="b">
+        <div class="panel">
+          <div class="ptop"><span>СЕАНС ПІДБОРУ</span><span>№ 04127</span></div>
+          <div class="msg you"><div class="who">ВИ</div><p>Інтернет-магазин. Заявки з сайту обробляю руками, іде пів дня.</p></div>
+          <div class="msg ai"><div class="who">АСИСТЕНТ</div><p>Скільки заявок на день і куди вони мають потрапляти — CRM, таблиця, месенджер?</p></div>
+          <div class="msg you"><div class="who">ВИ</div><p>Близько 40. Хочу в Telegram і в Google Таблицю.</p></div>
+          <div class="msg ai"><div class="who">АСИСТЕНТ</div>
+            <p>Зв'язка з трьох елементів. Розробник не потрібен.</p>
+            <div class="rows">
+              <div><span>Приймання і сортування заявок</span><span>0 ₴</span></div>
+              <div><span>Автовідповідь за 30 секунд</span><span>450 ₴/міс</span></div>
+              <div><span>Вивантаження в Telegram і Таблицю</span><span>входить</span></div>
+            </div>
+          </div>
+          <div class="ask"><i></i>Опишіть свою задачу</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="paper">
+  <div class="wrap">
+    <div class="calcgrid">
+      <div class="a">
+        <span class="lbl">ГРОШІ</span>
+        <h2 style="margin-top:28px">Скільки коштує те, що ви робите руками</h2>
+        <p class="lede" style="margin-top:24px">У гривнях, а не в абстрактних годинах.</p>
+        <p class="draft">Рахунок за вашими числами. Ми не знаємо вашого бізнесу краще за вас —
+          цифра потрібна, щоб ви побачили порядок величини.</p>
+      </div>
+      <div class="b">
+        <div class="inputs">
+          <label>Скільки разів на місяць<input class="mono" id="f1" type="number" value="20"></label>
+          <label>Скільки хвилин займає щоразу<input class="mono" id="f2" type="number" value="45"></label>
+          <label>Вартість години роботи, ₴<input class="mono" id="f3" type="number" value="380"></label>
+          <label>Скільки забере інструмент, %<input class="mono" id="f4" type="number" value="80"></label>
+        </div>
+        <div class="figures">
+          <div class="fig"><div class="c">ЗАРАЗ, НА МІСЯЦЬ</div><div class="v" id="rNow">5 700 ₴</div><div class="s" id="rNowH">15 годин ручної роботи</div></div>
+          <div class="fig b"><div class="c">ПІСЛЯ ВПРОВАДЖЕННЯ</div><div class="v" id="rAft">1 140 ₴</div><div class="s" id="rAftH">3 години</div></div>
+        </div>
+        <div class="total">
+          <div><div class="c mono" style="font-size:11.5px;letter-spacing:.14em;color:#78708F">РІЗНИЦЯ ЗА РІК</div>
+            <div class="v" id="rYear">54 720 ₴</div></div>
+          <a href="#" class="btn btn-o">Підібрати інструмент</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <span class="lbl">ЯК ЦЕ ВИГЛЯДАЄ</span>
+    <h2 style="margin-top:28px;max-width:16ch">Один запит — одна відповідь. Ось вона повністю.</h2>
+    <div class="spec"><div class="k">ЗАПИТ</div><div class="v">
+      <h3>«Треба щотижня робити 12 постів для двох акаунтів»</h3>
+      <p>Магазин домашнього текстилю. Працює власниця і одна помічниця.</p></div></div>
+    <div class="spec"><div class="k">ЩО ПІДІБРАНО</div><div class="v">
+      <h3>Два інструменти і шаблон тижня</h3>
+      <p>Перший пише тексти під голос бренду, другий робить візуали в єдиному стилі.
+        Публікація ставиться на тиждень уперед.</p></div></div>
+    <div class="spec"><div class="k">РЕЗУЛЬТАТ</div><div class="v">
+      <div class="big">6 год → 50 хв</div>
+      <p>На тиждень. Інструменти — 720 ₴ на місяць.</p></div></div>
+    <p class="draft">Чернетка формату, не реальний кейс. Сюди мають стати справжні цифри
+      справжнього клієнта — інакше блок працює проти довіри.</p>
+  </div>
+  <svg class="horizon" viewBox="0 0 1440 26" preserveAspectRatio="none" aria-hidden="true">
+    <path class="hi" d="M0,20 L200,6 L390,22 L610,10 L840,23 L1080,8 L1300,19 L1440,11"/>
+  </svg>
+</section>
+
+<section>
+  <div class="wrap">
+    <span class="lbl">ЧЕСНО</span>
+    <h2 style="margin-top:28px">«А чому не просто ChatGPT?»</h2>
+    <p class="lede" style="margin-top:24px">Питання правильне. ChatGPT — теж інструмент із каталогу.
+      Різниця не в тому, хто розумніший.</p>
+    <div class="vs">
+      <div><h3>ЗАГАЛЬНИЙ ЧАТ</h3><ul>
+        <li>Порадить те, про що чув найбільше — не те, що дешевше під вашу задачу</li>
+        <li>Не знає, що інструмент підняв ціни минулого місяця</li>
+        <li>Дає пораду, а не налаштування — далі розбиратись вам</li>
+        <li>Не рахує вартість на вашому обсязі</li></ul></div>
+      <div class="us"><h3>SYMPLEXY</h3><ul>
+        <li>Порівнює під вашу задачу, обсяг і бюджет — і називає один варіант</li>
+        <li>Каталог оновлюється: ціни й обмеження актуальні</li>
+        <li>Дає порядок дій: що підключити першим</li>
+        <li>Показує вартість на місяць до того, як ви щось почали</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<section class="paper">
+  <div class="wrap">
+    <span class="lbl">ПОРЯДОК</span>
+    <h2 style="margin-top:28px">Від запиту до працюючого рішення</h2>
+    <div class="flow">
+      <div><div class="k">КРОК 01</div><h3>Описуєте задачу</h3><p>Своїми словами. Форму заповнювати не треба.</p></div>
+      <div><div class="k">КРОК 02</div><h3>Отримуєте підбір</h3><p>Інструмент, причина вибору, вартість, запасний варіант.</p></div>
+      <div><div class="k">КРОК 03</div><h3>Підключаєте</h3><p>За інструкцією або з нашою допомогою.</p></div>
+      <div><div class="k">КРОК 04</div><h3>Рахуєте різницю</h3><p>Через місяць звіряєте з калькулятором.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="two">
+      <div class="a">
+        <span class="lbl">КАТАЛОГ</span>
+        <h2 style="margin-top:28px">Знаєте, що шукаєте — заходьте одразу</h2>
+        <p class="lede" style="margin-top:24px">Асистент потрібен, коли не знаєш, із чого почати.
+          Коли знаєш — фільтруйте каталог самі.</p>
+        <a href="#" class="btn btn-b" style="margin-top:30px">Перейти в каталог</a>
+      </div>
+      <div class="b">
+        <div class="cats">
+          <a href="#">Зображення</a><a href="#">Відео</a><a href="#">Тексти</a>
+          <a href="#">Реклама</a><a href="#">Соцмережі</a><a href="#">Автоматизація</a>
+          <a href="#">Аналітика</a><a href="#">Озвучка</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <span class="lbl">ГРОШІ, ЧЕСНО</span>
+    <h2 style="margin-top:28px">Скільки це коштує</h2>
+    <p class="lede" style="margin-top:24px">Найчастіша причина, чому люди йдуть із сайту —
+      не знайшли ціни. Тому вона тут.</p>
+    <div class="tiers">
+      <div><div class="p">0 ₴</div><h3>Підбір</h3><p>Опис задачі, інструмент, вартість, план дій. Без реєстрації.</p><a href="#" class="btn btn-o">Описати задачу</a></div>
+      <div class="hl"><div class="p">від 0 ₴</div><h3>Самі інструменти</h3><p>Платите напряму розробнику. Показуємо, де є безкоштовний тариф.</p><a href="#" class="btn btn-v">У каталог</a></div>
+      <div><div class="p" style="font-size:26px">за домовленістю</div><h3>Під ключ</h3><p>Налаштування, інтеграція, навчання команди — коли треба, щоб зробили за вас.</p><a href="#" class="btn btn-o">Обговорити</a></div>
+    </div>
+    <p class="draft">Числа-чернетки. Модель монетизації засновником не підтверджена.</p>
+  </div>
+</section>
+
+<section class="paper">
+  <div class="wrap">
+    <span class="lbl">ПИТАННЯ</span>
+    <h2 style="margin-top:28px">Те, що питають до того, як почати</h2>
+    <div class="qa">
+      <div><h3>Я нічого не тямлю в нейромережах. Це для мене?</h3><p>Саме для вас. Асистент питає про задачу і бізнес, а не про моделі й токени.</p></div>
+      <div><h3>Скільки часу займе впровадження?</h3><p>Проста автоматизація — вечір. Зв'язка з CRM і кількома каналами — до тижня.</p></div>
+      <div><h3>Мої дані кудись підуть?</h3><p>Опис задачі потрібен лише для підбору. Доступи ви підключаєте самі.</p></div>
+      <div><h3>А якщо підібране не підійде?</h3><p>Напишіть, що не спрацювало — підбір повторимо. Безкоштовно.</p></div>
+      <div><h3>Ви продаєте ці інструменти?</h3><p>Ні. Платите напряму розробнику — нам немає сенсу штовхати дорожче.</p></div>
+      <div><h3>Працюєте з ФОП і компаніями?</h3><p>Так. Для роботи під ключ є договір і закривні документи.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="two">
+      <div class="a">
+        <span class="lbl">ЗВ'ЯЗОК</span>
+        <h2 style="margin-top:28px">Лишились питання або є пропозиція?</h2>
+        <p class="lede" style="margin-top:24px">Відповімо в робочий день. Якщо задача термінова —
+          краще опишіть її асистенту, він відповідає одразу.</p>
+      </div>
+      <div class="b">
+        <form class="form">
+          <input placeholder="Ваше ім'я" aria-label="Ваше ім'я">
+          <input placeholder="Email або телефон" aria-label="Email або телефон">
+          <textarea rows="2" placeholder="Коротко про задачу" aria-label="Коротко про задачу"></textarea>
+          <a href="#" class="btn btn-v">Надіслати</a>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <svg class="range" viewBox="0 0 1440 220" preserveAspectRatio="none" aria-hidden="true">
+    <defs>
+      <linearGradient id="r1" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#8B6BFF" stop-opacity=".26"/><stop offset="1" stop-color="#0B0818" stop-opacity="0"/></linearGradient>
+      <linearGradient id="r2" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#4C86FF" stop-opacity=".18"/><stop offset="1" stop-color="#0B0818" stop-opacity="0"/></linearGradient>
+    </defs>
+    <path d="M0,220 L0,138 L190,58 L350,132 L520,74 L700,160 L860,96 L1040,168 L1220,88 L1440,142 L1440,220 Z" fill="url(#r2)"/>
+    <path d="M0,220 L0,172 L220,104 L410,170 L600,118 L780,186 L950,132 L1140,184 L1320,124 L1440,178 L1440,220 Z" fill="url(#r1)"/>
+    <path d="M0,138 L190,58 L350,132 L520,74 L700,160 L860,96 L1040,168 L1220,88 L1440,142" fill="none" stroke="#8B6BFF" stroke-opacity=".4" stroke-width="1"/>
+  </svg>
+  <div class="wrap">
+    <div class="fg">
+      <div>
+        <span class="logo">SYMPLEXY<b>.</b></span>
+        <p style="color:var(--chalk-3);font-size:15.5px;margin-top:14px;max-width:32ch">
+          Підбираємо AI-інструменти під конкретні задачі бізнесу — українською, без жаргону.</p>
+      </div>
+      <div><h4>НАВІГАЦІЯ</h4><ul><li><a href="#">Каталог</a></li><li><a href="#">Асистент</a></li><li><a href="#">Калькулятор</a></li><li><a href="#">Ціни</a></li><li><a href="#">Блог</a></li></ul></div>
+      <div><h4>КОНТАКТИ</h4><ul><li><a href="#">hello@symplexy.ai</a></li><li><a href="#">Telegram</a></li><li><a href="#">LinkedIn</a></li></ul></div>
+    </div>
+    <div class="fb"><span>© 2026 Symplexy</span><span><a href="#">Політика конфіденційності</a> · <a href="#">Угода користувача</a></span></div>
+  </div>
+</footer>
+
+<script>
+(function(){
+ var f=['f1','f2','f3','f4'].map(function(i){return document.getElementById(i)});
+ function m(n){return Math.round(n).toLocaleString('uk-UA').replace(/ /g,' ')+' ₴'}
+ function c(){var t=+f[0].value||0,mi=+f[1].value||0,r=+f[2].value||0,
+   k=Math.min(100,Math.max(0,+f[3].value||0))/100,h=t*mi/60,now=h*r,af=now*(1-k);
+  document.getElementById('rNow').textContent=m(now);
+  document.getElementById('rNowH').textContent=(Math.round(h*10)/10)+' годин ручної роботи';
+  document.getElementById('rAft').textContent=m(af);
+  document.getElementById('rAftH').textContent=(Math.round(h*(1-k)*10)/10)+' годин';
+  document.getElementById('rYear').textContent=m((now-af)*12)}
+ f.forEach(function(e){e.addEventListener('input',c)});c()})();
+</script>

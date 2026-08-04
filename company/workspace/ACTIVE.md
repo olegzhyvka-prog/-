@@ -29,14 +29,23 @@ founder-context: «нових напрямів не пропонувати, по
 
 ## Крок
 
-**Поточний:** запущена хвиля 1 з трьох. Повний бриф і опис продукту —
-`company/workspace/2026-08-04-symplexy-os-prelaunch/task.md`.
+**Поточний:** хвиля 1 (перша спроба) **впала повністю** — усі четверо на API-помилці
+«session limit, resets 4:50pm UTC». **Жодного файлу-результату не створено.** Уціліли
+тільки нотатки прогресу `principal-architect` у `task.md`.
 
-- ⏳ Хвиля 1 (паралельно, запущена 2026-08-04):
-  - `market-researcher` → `01-competitors.md` — конкуренти по 6 модулях + super-app + SAVE + маскот
-  - `ai-engineer` → `02-api-costs-limits.md` — собівартість запиту, API-ліміти, Gmail restricted scopes
-  - `principal-architect` → `03-build-cost-time.md` — no-code/low-code/full-code, приховані витрати
-  - `legal-compliance` → `04-legal-risks.md` — платежі без реєстрації, GDPR, авторські права, AI Act
+🔴 **Перевірене обмеження середовища** (двоє працівників незалежно, 2026-08-04):
+`WebFetch` і `curl` дають 403 на CONNECT до **всіх** зовнішніх хостів. Працює лише
+`WebSearch`. Обхід заборонений README проксі. Наслідок: сторінку цін ніхто не відкриє —
+усі ціни йдуть із пошукових сніпетів і **обовʼязково з мітками достовірності**.
+
+**Виправлення тактики:** запускаю по **двоє**, не по четверо (чотири паралельні агенти
+з важким веб-пошуком і вичерпали ліміт). Кожен бриф тепер вимагає створити файл
+результату **першою дією** і дописувати по розділах — щоб падіння не зʼїдало всю роботу.
+
+- ⏳ Хвиля 1a (друга спроба, запущена 2026-08-04):
+  - `market-researcher` → `01-competitors.md`
+  - `ai-engineer` → `02-api-costs-limits.md`
+- ⬜ Хвиля 1b: `principal-architect` → `03-build-cost-time.md` · `legal-compliance` → `04-legal-risks.md`
 - ⬜ Хвиля 2: `finance-controller` → `05-pricing-economics.md` · `product-strategist` → `06-verdict-sequence.md`
 - ⬜ Хвиля 3: `red-team-critic` → `07-red-team.md`
 - ⬜ Зведення в `report.md`, звіт засновнику, коміт і пуш

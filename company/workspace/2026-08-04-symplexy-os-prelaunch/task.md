@@ -85,6 +85,19 @@ Free = базові задачі. Pro = агентні можливості, л�
   **[оцінка]** з поясненням, як вона отримана.
 - Без води і загальних фраз.
 
+## Прогрес `principal-architect` (розділ 3 + тех. частина розділу 4)
+
+- [x] Прочитано task.md, founder-context.md, власну памʼять (порожня — перша робота по продукту)
+- [x] Виявлено: **прямий WebFetch до всіх сайтів вендорів блокує egress-політика середовища**
+      (403 на CONNECT: supabase.com, vercel.com, bubble.io, rive.app, stripe.com,
+      developers.cloudflare.com і ще 19 хостів — перевірено curl 2026-08-04).
+      Обхід заборонений README проксі. Ціни збираю через `WebSearch`.
+- [x] Зібрано ціни: Bubble, FlutterFlow, Rive, Supabase, Vercel, R2, Resend, Sentry,
+      Railway, n8n, Make, OneSignal, Upstash, WayForPay/Fondy, CASA Tier 2, ставки розробників
+- [ ] ← ЗАРАЗ: добір цін (сховище відео, App Store/Play, аніматор Rive) і написання файлу
+- [ ] `03-build-cost-time.md` — розділи 1–4
+- [ ] Памʼять оновлена
+
 ## Чеклист хвиль
 
 - [ ] Хвиля 1: market-researcher · ai-engineer · principal-architect · legal-compliance
